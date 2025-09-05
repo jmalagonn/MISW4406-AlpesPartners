@@ -22,3 +22,9 @@ def rename_customerafiliate_task(payload: dict) -> dict:
         cmd = RenameAfiliate(**payload)
         handle_rename_afiliate(cmd, session)
         return {"ok": True}
+    
+@celery.task(name="events.afiliate_created")
+def publish_afiliate_created_event(event_data):
+    
+    log.info("Publishing event: %s", event_data)
+    return {"published": True}

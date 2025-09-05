@@ -5,9 +5,10 @@ from infrastructure.db import init_db
 
 def create_app():
     app = Flask(__name__)
-    app.config["DEBUG"] = settings.DEBUG
+    app.config.from_object(settings)
     app.register_blueprint(api_bp)
     
-    # For demo: auto-create tables (use Alembic in real apps)
-    init_db()
+    with app.app_context():
+        init_db()
+        
     return app

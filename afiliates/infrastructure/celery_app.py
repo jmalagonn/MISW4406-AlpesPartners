@@ -20,4 +20,5 @@ celery.conf.update(
 
 celery.conf.task_routes = {
     "commands.*": {"queue": "commands"},
+    "events.*": {"queue": "events"},
 }

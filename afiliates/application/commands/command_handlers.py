@@ -1,3 +1,4 @@
+from afiliates.presentation.worker import publish_afiliate_created_event
 from domain.models import Afiliate
 from infrastructure.repository import AfiliateRepository
 
@@ -6,7 +7,13 @@ def handle_create_afiliate(cmd, session) -> str:
     a = Afiliate(name=cmd.name.strip())
     repo.add(a)
     
-    # Place to emit domain event "AfiliateCreated" via Outbox if needed
+    for event in a.events:
+        publish_afiliate_created_event.delay({
+            "afiliate_id": event.afiliate_id,
+            "name": event.name,
+            "created_at": event.created_at.isoformat()
+        })
+        
     return a.id
 
 def handle_rename_afiliate(cmd, session):

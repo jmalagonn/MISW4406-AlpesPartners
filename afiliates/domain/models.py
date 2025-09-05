@@ -1,20 +1,51 @@
-from __future__ import annotations
-from dataclasses import dataclass
-from typing import Optional
-from datetime import datetime
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-from sqlalchemy import String, DateTime, func
 import uuid
+from dataclasses import dataclass, field
+from datetime import datetime
+from value_objects import Name
+from rules import IdentityIdIsInmutable
+from exceptions import IdMustBeImmutableException
 
-class Base(DeclarativeBase):
-    pass
 
-class Afiliate(Base):
-    __tablename__ = "afiliates"
+@dataclass
+class Entity:
+    id: uuid.UUID = field(hash=True)
+    _id: uuid.UUID = field(init=False, repr=False, hash=True)
+    _events: list = field(default_factory=list, init=False, repr=False)
+    created_on: datetime =  field(default=datetime.now())
+    updated_on: datetime = field(default=datetime.now())
 
-    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    name: Mapped[str] = mapped_column(String(120))
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    @classmethod
+    def next_id(self) -> uuid.UUID:
+        return uuid.uuid4()
+
+    @property
+    def id(self):
+        return self._id
+    
+    @property
+    def events(self):
+        return self._events
+
+    @id.setter
+    def id(self, id: uuid.UUID) -> None:
+        if not IdentityIdIsInmutable(self).is_valid():
+            raise IdMustBeImmutableException()
+        self._id = self.next_id()
+
+
+@dataclass
+class Afiliate(Entity):
+    name: Name = field(default_factory=Name)
+
+    def __post_init__(self):
+        from domain.events import AfiliateCreatedEvent
+        self._events.append(
+            AfiliateCreatedEvent(
+                afiliate_id=self.id,
+                name=self.name,
+                created_at=self.created_at
+            )
+        )
 
     def rename(self, new_name: str):
         if not new_name or len(new_name.strip()) < 2:
