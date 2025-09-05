@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from infrastructure.db import session_scope
+from infrastructure.db.db import session_scope
 from application.queries.queries import GetAfiliateById, ListAfiliates
 from application.queries.query_handlers import handle_get_afiliate_by_id, handle_list_afiliates
 from infrastructure.celery_app import celery

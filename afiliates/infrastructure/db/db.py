@@ -2,7 +2,7 @@ from contextlib import contextmanager
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 from config import settings
-from domain.models import Base
+from .db_models import Base
 
 engine = create_engine(
     settings.DATABASE_URL,

@@ -8,4 +8,8 @@ Servicio de afiliados:
 - Docker
 
 ## Ejecución local
-En una terminal situada en la raíz del proyecto ejecutar el comando: ```docker-compose up --build``
+En una terminal situada en la raíz del proyecto, ejecuta el siguiente comando:
+
+```bash
+docker-compose up --build
+```

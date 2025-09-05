@@ -1,9 +1,9 @@
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime
-from value_objects import Name
-from rules import IdentityIdIsInmutable
-from exceptions import IdMustBeImmutableException
+from .value_objects import Name
+from .rules import IdentityIdIsInmutable
+from .exceptions import IdMustBeImmutableException
 
 
 @dataclass

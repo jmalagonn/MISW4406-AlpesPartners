@@ -1,6 +1,6 @@
 from typing import Optional, List
 from sqlalchemy import select
-from afiliates.infrastructure.db.db_models import AfiliateModel
+from infrastructure.db.db_models import AfiliateModel
 from domain.models import Afiliate
 
 class AfiliateRepository:

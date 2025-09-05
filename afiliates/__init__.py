@@ -1,7 +1,7 @@
 from flask import Flask
 from config import settings
 from presentation.api import bp as api_bp
-from infrastructure.db import init_db
+from infrastructure.db.db import init_db
 
 def create_app():
     app = Flask(__name__)
