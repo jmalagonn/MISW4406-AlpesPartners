@@ -1,8 +1,8 @@
 from celery.utils.log import get_task_logger
 from infrastructure.celery_app import celery
 from infrastructure.db import session_scope
-from application.commands import CreateAfiliate, RenameAfiliate
-from application.command_handlers import (
+from application.commands.commands import CreateAfiliate, RenameAfiliate
+from application.commands.command_handlers import (
     handle_create_afiliate, handle_rename_afiliate
 )
 

@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from infrastructure.db import session_scope
-from application.queries import GetAfiliateById, ListAfiliates
-from application.query_handlers import handle_get_afiliate_by_id, handle_list_afiliates
+from application.queries.queries import GetAfiliateById, ListAfiliates
+from application.queries.query_handlers import handle_get_afiliate_by_id, handle_list_afiliates
 from infrastructure.celery_app import celery
 
 bp = Blueprint("afiliates", __name__, url_prefix="/afiliates")
@@ -35,10 +35,8 @@ def create_afiliate():
     if not body or not required.issubset(body):
         return {"error": "name is required"}, 400
 
-    # Fire-and-forget command; worker will do the write
     task = celery.send_task("commands.create_afiliate", args=[{"name": body["name"]}])
     
-    # We don’t wait for result (CQS). Tell the client how to read later.
     return {
         "status": "accepted",
         "message": "Afiliate creation enqueued",

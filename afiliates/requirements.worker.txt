@@ -1,0 +1,5 @@
+-r constraints.txt
+celery
+SQLAlchemy
+psycopg2-binary
+python-dotenv

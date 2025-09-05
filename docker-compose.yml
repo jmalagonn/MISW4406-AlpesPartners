@@ -24,7 +24,9 @@ services:
       retries: 20
 
   afiliates:
-    build: .
+    build:
+      context: ./afiliates
+      dockerfile: Dockerfile.api 
     environment:
       DATABASE_URL: postgresql+psycopg2://app:app@db:5432/app
       BROKER_URL: amqp://guest:guest@mq:5672//
@@ -36,9 +38,10 @@ services:
         condition: service_healthy
     ports: ["8000:8000"]
 
-  worker:
-    build: .
-    command: celery -A afiliates.infrastructure.celery_app.celery worker -Q commands -l info
+  afiliates_worker:
+    build: 
+      context: ./afiliates
+      dockerfile: Dockerfile.worker
     environment:
       DATABASE_URL: postgresql+psycopg2://app:app@db:5432/app
       BROKER_URL: amqp://guest:guest@mq:5672//
