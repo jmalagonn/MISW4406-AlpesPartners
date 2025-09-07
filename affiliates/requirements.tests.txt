@@ -1,0 +1,4 @@
+-r constraints.txt
+pytest
+pytest-cov
+freezegun
