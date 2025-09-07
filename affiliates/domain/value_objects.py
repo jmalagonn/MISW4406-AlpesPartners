@@ -9,3 +9,6 @@ class ValueObject:
 @dataclass(frozen=True)
 class Name(ValueObject):
     name: str
+    
+    def __str__(self): 
+        return self.name

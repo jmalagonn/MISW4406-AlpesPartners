@@ -2,7 +2,7 @@
 
 ## Servicios
 Servicio de afiliados:
--  carpeta raíz: afiliates
+-  carpeta raíz: affiliates
 
 ## Requerimientos:
 - Docker

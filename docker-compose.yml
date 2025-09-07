@@ -23,9 +23,9 @@ services:
       timeout: 3s
       retries: 20
 
-  afiliates:
+  affiliates:
     build:
-      context: ./afiliates
+      context: ./affiliates
       dockerfile: Dockerfile.api 
     environment:
       DATABASE_URL: postgresql+psycopg2://app:app@db:5432/app
@@ -38,9 +38,9 @@ services:
         condition: service_healthy
     ports: ["8000:8000"]
 
-  afiliates_worker:
+  affiliates_worker:
     build: 
-      context: ./afiliates
+      context: ./affiliates
       dockerfile: Dockerfile.worker
     environment:
       DATABASE_URL: postgresql+psycopg2://app:app@db:5432/app

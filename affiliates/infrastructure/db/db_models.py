@@ -6,9 +6,9 @@ from datetime import datetime
 class Base(DeclarativeBase):
     pass
 
-class AfiliateModel(Base):
-    __tablename__ = "afiliates"
+class AffiliateModel(Base):
+    __tablename__ = "affiliates"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    name: Mapped[str] = mapped_column(String(120))
+    name: Mapped[str] = mapped_column(String(120), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

@@ -22,3 +22,7 @@ celery.conf.task_routes = {
     "commands.*": {"queue": "commands"},
     "events.*": {"queue": "events"},
 }
+
+celery.conf.update(include=[
+    "presentation.worker",
+])

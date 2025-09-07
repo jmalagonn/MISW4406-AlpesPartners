@@ -14,4 +14,6 @@ RUN pip install --no-cache-dir -r requirements.worker.txt
 
 COPY . .
 
-CMD ["celery", "-A", "infrastructure.celery_app.celery", "worker", "-Q", "commands", "-l", "info"]
+ENV PYTHONPATH=/app
+
+CMD ["celery", "-A", "infrastructure.celery_app.celery", "worker", "-Q", "commands, events", "-l", "info"]

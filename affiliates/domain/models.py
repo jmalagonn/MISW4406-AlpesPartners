@@ -8,11 +8,12 @@ from .exceptions import IdMustBeImmutableException
 
 @dataclass
 class Entity:
-    id: uuid.UUID = field(hash=True)
     _id: uuid.UUID = field(init=False, repr=False, hash=True)
     _events: list = field(default_factory=list, init=False, repr=False)
-    created_on: datetime =  field(default=datetime.now())
-    updated_on: datetime = field(default=datetime.now())
+    
+    id: uuid.UUID = field(hash=True)
+    created_at: datetime = field(default_factory=lambda: datetime.now(), kw_only=True)
+    updated_on: datetime = field(default_factory=lambda: datetime.now(), kw_only=True)
 
     @classmethod
     def next_id(self) -> uuid.UUID:
@@ -34,20 +35,20 @@ class Entity:
 
 
 @dataclass
-class Afiliate(Entity):
+class Affiliate(Entity):
     name: Name = field(default_factory=Name)
 
-    def __post_init__(self):
-        from domain.events import AfiliateCreatedEvent
-        self._events.append(
-            AfiliateCreatedEvent(
-                afiliate_id=self.id,
-                name=self.name,
-                created_at=self.created_at
-            )
-        )
+    # def __post_init__(self):
+    #     from domain.events import AffiliateCreatedEvent
+    #     self._events.append(
+    #         AffiliateCreatedEvent(
+    #             id=self.id,
+    #             name=self.name,
+    #             created_at=self.created_at
+    #         )
+    #     )
 
     def rename(self, new_name: str):
         if not new_name or len(new_name.strip()) < 2:
-            raise ValueError("Afiliate name too short")
+            raise ValueError("Affiliate name too short")
         self.name = new_name.strip()

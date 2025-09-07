@@ -1,10 +1,10 @@
 from dataclasses import dataclass
 
 @dataclass
-class GetAfiliateById:
-    afiliate_id: str
+class GetAffiliateById:
+    affiliate_id: str
 
 @dataclass
-class ListAfiliates:
+class ListAffiliates:
     limit: int = 50
     offset: int = 0

@@ -1,14 +1,14 @@
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime
-from rules import IdentityIdIsInmutable
-from exceptions import IdMustBeImmutableException
+from .rules import IdentityIdIsInmutable
+from .exceptions import IdMustBeImmutableException
 
 @dataclass
 class DomainEvent():
     id: uuid.UUID = field(hash=True)
     _id: uuid.UUID = field(init=False, repr=False, hash=True)
-    fecha_evento: datetime =  field(default=datetime.now())
+    event_date: datetime = field(default=datetime.now())
 
 
     @classmethod
@@ -27,5 +27,7 @@ class DomainEvent():
         
 
 @dataclass
-class AfiliateCreatedEvent(DomainEvent):
-  ...
+class AffiliateCreatedEvent(DomainEvent):
+    name: str
+    created_at: datetime = field(default=datetime.now())
+  

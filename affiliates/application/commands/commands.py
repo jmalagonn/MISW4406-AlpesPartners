@@ -1,10 +1,11 @@
 from dataclasses import dataclass
 
 @dataclass
-class CreateAfiliate:
+class CreateAffiliate:
     name: str
+    created_at: str
 
 @dataclass
-class RenameAfiliate:
-    afiliate_id: str
+class RenameAffiliate:
+    id: str
     name: str
