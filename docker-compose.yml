@@ -55,7 +55,7 @@ services:
     build:
       context: ./client/bff
     environment:
-      AFFILIATES_API_URL: http://localhost:8000
+      AFFILIATES_API_URL: http://affiliates:8000
       DEBUG: "true"
     depends_on:
       - affiliates

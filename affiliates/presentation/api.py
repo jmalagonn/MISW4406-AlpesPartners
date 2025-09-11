@@ -9,7 +9,7 @@ bp = Blueprint("affiliates", __name__, url_prefix="/affiliates")
 
 @bp.get("/health")
 def health():
-    return {"status": "ok"}, 200
+    return {"status": "Affiliates health serivce ok"}, 200
 
 # ===== QUERIES (read) =====
 @bp.get("/")

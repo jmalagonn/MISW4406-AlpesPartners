@@ -25,9 +25,9 @@ def create_app():
     app.logger.info("Flask app logger configured at INFO")
 
     app.config.from_mapping(
-        AFFILIATES_SVC_URL=os.environ.get("AFFILIATES_SVC_URL", "default_value"),
-        LOYALTY_SVC_URL=os.environ.get("LOYALTY_SVC_URL", "default_value"),
-        ALLIANCES_SVC_URL=os.environ.get("ALLIANCES_SVC_URL", "default_value"),
+        AFFILIATES_API_URL=os.environ.get("AFFILIATES_API_URL", "default_value"),
+        LOYALTY_API_URL=os.environ.get("LOYALTY_API_URL", "default_value"),
+        ALLIANCES_API_URL=os.environ.get("ALLIANCES_API_URL", "default_value"),
         DEFAULT_TIMEOUT=float(os.environ.get("DEFAULT_TIMEOUT", "2.0")),
     )
 
