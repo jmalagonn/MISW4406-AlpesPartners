@@ -15,7 +15,7 @@ def _log_request():
     current_app.logger.info("REQ %s %s req_id=%s", request.method, request.path, req_id)
     
 @bp.get("/affiliates/health")
-def affiliatea_health_check():
+def affiliates_health_check():
     timeout = current_app.config["DEFAULT_TIMEOUT"]
     affiliates_url = current_app.config["AFFILIATES_API_URL"]
 
@@ -25,6 +25,20 @@ def affiliatea_health_check():
         response = client.get(f"{affiliates_url}/affiliates/health", headers=headers) 
 
     return _proxy_response(response)
+
+
+@bp.get("/loyalty/health")
+def loyalty_health_check():
+    timeout = current_app.config["DEFAULT_TIMEOUT"]
+    loyalty_url = current_app.config["LOYALTY_API_URL"]
+
+    headers, req_id = forward_headers(request.headers)
+
+    with make_client(timeout) as client:
+        response = client.get(f"{loyalty_url}/loyalty/health", headers=headers) 
+
+    return _proxy_response(response)
+
 
 @bp.post("/affiliate")
 def create_affiliate():

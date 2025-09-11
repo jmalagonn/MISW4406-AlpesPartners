@@ -1,4 +1,16 @@
 services:
+  bff:
+    build:
+      context: ./client/bff
+    environment:
+      AFFILIATES_API_URL: http://affiliates:8000
+      LOYALTY_API_URL: http://loyalty:8010
+      DEBUG: "true"
+    depends_on:
+      - affiliates
+      - loyalty
+    ports: ["8080:8080"]  
+
   mq:
       image: rabbitmq:3-management
       ports:
@@ -16,7 +28,7 @@ services:
       POSTGRES_USER: app
       POSTGRES_PASSWORD: app
       POSTGRES_DB: app
-    ports: ["5432:5432"]
+    ports: ["5432"]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U app -d app"]
       interval: 5s
@@ -51,12 +63,31 @@ services:
       mq:
         condition: service_healthy
 
-  bff:
-    build:
-      context: ./client/bff
+  loyalty_db:
+    image: postgres:16
     environment:
-      AFFILIATES_API_URL: http://affiliates:8000
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+      POSTGRES_DB: app
+    ports: ["5432"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d app"]
+      interval: 5s
+      timeout: 3s
+      retries: 20  
+
+  loyalty:
+    build:
+      context: ./loyalty
+    environment:
+      DATABASE_URL: postgresql+psycopg2://app:app@loyalty_db:5432/app
+      BROKER_URL: amqp://guest:guest@mq:5672//
       DEBUG: "true"
     depends_on:
-      - affiliates
-    ports: ["8080:8080"]        
+      affiliates_db:
+        condition: service_healthy
+      mq:
+        condition: service_healthy
+    ports: ["8010:8010"]
+
+        
