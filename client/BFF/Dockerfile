@@ -19,7 +19,14 @@ RUN pip install /wheels/*
 COPY . .
 
 USER appuser
-EXPOSE 8000
+EXPOSE 8080
 
 ENV WEB_CONCURRENCY=2 THREADS=4 TIMEOUT=30
-CMD ["gunicorn", "--bind=0.0.0.0:8000", "--workers=${WEB_CONCURRENCY}", "--threads=${THREADS}", "--timeout=${TIMEOUT}", "wsgi:app"]
+CMD ["sh", "-c", "exec gunicorn \
+  --bind=0.0.0.0:8080 \
+  --workers=${WEB_CONCURRENCY:-2} \
+  --threads=${THREADS:-4} \
+  --timeout=${TIMEOUT:-30} \
+  --access-logfile - --error-logfile - \
+  --log-level info --capture-output \
+  wsgi:app"]

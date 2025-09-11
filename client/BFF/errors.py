@@ -10,4 +10,4 @@ def register_error_handlers(app):
         app.logger.exception("Unhandled error")
         return jsonify({"error": "internal_error"}), 500
 
-import httpx  # keep import so handler references resolve
+import httpx 
