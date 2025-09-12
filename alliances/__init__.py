@@ -1,13 +1,14 @@
-import logging, sys
+import logging
+import sys
 from flask import Flask
-from application.routes import bp as api_bp
-from domain.errors import register_error_handlers
 from config import settings
-from infrastructure.pulsar_ext import pulsar_ext
+from presentation.api import bp as api_bp
+from infrastructure.db.db import init_db
 
 def create_app():
     app = Flask(__name__)
     app.config.from_object(settings)
+    app.register_blueprint(api_bp)
     
     # Logging configuration
     handler = logging.StreamHandler(sys.stdout)
@@ -24,17 +25,8 @@ def create_app():
         app.logger.handlers = gunicorn_logger.handlers
         app.logger.setLevel(gunicorn_logger.level)
         app.logger.propagate = False
-
-    app.logger.info("Flask app logger configured at INFO")
-
-    pulsar_ext.init_app(app)
-    app.register_blueprint(api_bp, url_prefix="/api/v1")
-    register_error_handlers(app)
-
-    @app.get("/health")
-    def health():
-        return {"status": "ok"}, 200
-
+    
+    with app.app_context():
+        init_db()
+        
     return app
-
-import os 
