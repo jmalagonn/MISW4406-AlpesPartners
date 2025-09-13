@@ -2,5 +2,5 @@ from dataclasses import dataclass
 
 
 @dataclass
-class CreateBrand:
+class CreateBrandDto:
     name: str   

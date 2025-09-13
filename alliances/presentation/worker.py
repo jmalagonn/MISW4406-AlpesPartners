@@ -1,6 +1,8 @@
 import os, json, logging
 import sys
+from application.dto import CreateBrandDto
 from infrastructure.pulsar.consumer import start_consumer
+from infrastructure.db.db import session_scope
 from application.commands.command_handlers import handle_create_brand
 
 logging.basicConfig(
@@ -17,8 +19,12 @@ def handle(payload, props):
   logging.info("Received msg props=%s payload=%s", props, json.dumps(payload))
     
   if props.get("name") == "CreateBrand":
-    handle_create_brand(payload)
-
+    with session_scope() as session:
+      dto = CreateBrandDto(**payload)    
+      new_id = handle_create_brand(dto, session)
+      
+      logging.info("Brand created id=%s", new_id)
+      
 
 def main():
   start_consumer(TOPIC_COMMANDS_ALLIANCES, SUBSCRIPTION_NAME, handle)
