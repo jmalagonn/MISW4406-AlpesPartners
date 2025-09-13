@@ -2,11 +2,11 @@ services:
   pulsar:
     image: apachepulsar/pulsar:3.2.0
     command: ["bash","-c","bin/pulsar standalone --no-functions-worker"]
-    ports: ["6650:6650", "8090:8090"]
+    ports: ["6650:6650", "8090:8080"]
     environment:
       PULSAR_PREFIX_advertisedAddress: pulsar 
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://localhost:8090/admin/v2/brokers/health || exit 1"]
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/admin/v2/brokers/health || exit 1"]
       interval: 5s
       timeout: 3s
       retries: 20
