@@ -19,7 +19,8 @@ services:
       PULSAR_URL: pulsar://pulsar:6650
       AFFILIATES_API_URL: http://affiliates:8000
       TOPIC_COMMANDS_AFFILIATES: commands.affiliates
-      # LOYALTY_API_URL: http://loyalty:8010
+      TRACKING_API_URL: http://tracking:8010
+      TOPIC_COMMANDS_TRACKING: commands.tracking
       ALLIANCES_API_URL: http://alliances:8020
       TOPIC_COMMANDS_ALLIANCES: commands.alliances
       DEBUG: "true"
@@ -46,7 +47,7 @@ services:
       context: ./affiliates
     environment:
       DATABASE_URL: postgresql+psycopg2://app:app@affiliates_db:5432/app
-      BROKER_URL: amqp://guest:guest@mq:5672//
+      PULSAR_URL: pulsar://pulsar:6650
       DEBUG: "true"
     depends_on:
       affiliates_db:
@@ -70,39 +71,54 @@ services:
         condition: service_healthy
     command: python -m presentation.worker
 
-  # loyalty_db:
-  #   image: postgres:16
-  #   environment:
-  #     POSTGRES_USER: app
-  #     POSTGRES_PASSWORD: app
-  #     POSTGRES_DB: app
-  #   ports: ["5432"]
-  #   healthcheck:
-  #     test: ["CMD-SHELL", "pg_isready -U app -d app"]
-  #     interval: 5s
-  #     timeout: 3s
-  #     retries: 20  
+  tracking_db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+      POSTGRES_DB: app
+    ports: ["5432"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d app"]
+      interval: 5s
+      timeout: 3s
+      retries: 20  
 
-  # loyalty:
-  #   build:
-  #     context: ./loyalty
-  #   environment:
-  #     DATABASE_URL: postgresql+psycopg2://app:app@loyalty_db:5432/app
-  #     BROKER_URL: amqp://guest:guest@mq:5672//
-  #     DEBUG: "true"
-  #   depends_on:
-  #     affiliates_db:
-  #       condition: service_healthy
-  #     mq:
-  #       condition: service_healthy
-  #   ports: ["8010:8010"]
+  tracking:
+    build:
+      context: ./tracking
+    environment:
+      DATABASE_URL: postgresql+psycopg2://app:app@tracking_db:5432/app
+      PULSAR_URL: pulsar://pulsar:6650
+      DEBUG: "true"
+    depends_on:
+      affiliates_db:
+        condition: service_healthy
+      pulsar:
+        condition: service_healthy
+    ports: ["8010:8010"]
+
+  tracking_worker:
+    build: 
+      context: ./tracking
+    environment:
+      DATABASE_URL: postgresql+psycopg2://app:app@affiliates_db:5432/app
+      PULSAR_URL: pulsar://pulsar:6650
+      TOPIC_COMMANDS_TRACKING: commands.tracking
+      SUBSCRIPTION_NAME: tracking-svc
+    depends_on:
+      tracking_db:
+        condition: service_healthy
+      pulsar:
+        condition: service_healthy
+    command: python -m presentation.worker
 
   alliances:
     build:
       context: ./alliances
     environment:
       DATABASE_URL: postgresql+psycopg2://app:app@alliances_db:5432/app
-      BROKER_URL: amqp://guest:guest@mq:5672//
+      PULSAR_URL: pulsar://pulsar:6650
       DEBUG: "true"
     depends_on:
       alliances_db:
