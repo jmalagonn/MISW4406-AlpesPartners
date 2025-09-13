@@ -1,5 +1,3 @@
-import json
-import uuid
 from flask import Blueprint, Response, current_app, request, jsonify
 import requests
 from infrastructure.pulsar_ext import pulsar_ext
@@ -44,28 +42,7 @@ def loyalty_health_check():
 
     return _proxy_response(response)
 
-
-@bp.post("/brand")
-def create_affiliate():
-    current_app.logger.info(f"Brand creation requested") 
-
-    body = request.get_json(force=True)
-    cmd_id = str(uuid.uuid4())
-    corr_id = request.headers.get("X-Request-Id", str(uuid.uuid4()))
-    topic = current_app.config["TOPIC_COMMANDS_ALLIANCES"]
-    
-    producer = pulsar_ext.producer(topic)    
-    producer.send(
-        json.dumps(body).encode("utf-8"),
-        partition_key=cmd_id,
-        properties={
-            "commandId": cmd_id,
-            "correlationId": corr_id,
-            "name": "CreateBrand"
-        },
-    )
-    
-    return jsonify({"status": "accepted", "trackingId": cmd_id}), 202
+from .alliances import brand_bp
   
 def _proxy_response(upstream: requests.Response) -> Response:
     out = Response(upstream.content, status=upstream.status_code)

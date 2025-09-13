@@ -1,5 +1,6 @@
-import uuid, datetime
+import uuid
 from dataclasses import dataclass, field
+from datetime import datetime
 from domain.value_objects import Name
 from domain.exceptions import IdMustBeImmutableException
 from domain.rules import IdentityIdIsInmutable
@@ -36,16 +37,6 @@ class Entity:
 @dataclass
 class Brand(Entity):
     name: Name = field(default_factory=Name)
-
-    # def __post_init__(self):
-    #     from domain.events import AffiliateCreatedEvent
-    #     self._events.append(
-    #         AffiliateCreatedEvent(
-    #             id=self.id,
-    #             name=self.name,
-    #             created_at=self.created_at
-    #         )
-    #     )
 
     def rename(self, new_name: str):
         if not new_name or len(new_name.strip()) < 2:
