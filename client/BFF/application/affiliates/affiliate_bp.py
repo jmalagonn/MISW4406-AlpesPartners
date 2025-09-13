@@ -36,7 +36,7 @@ def get_affiliates():
     if not service_url:
         return {"error": "misconfig", "detail": "AFFILIATES_API_URL is missing"}, 500
     
-    api_path = "affiliates"
+    api_path = "affiliates/"
     final_url = urljoin(service_url.rstrip('/') + '/', api_path.lstrip('/'))
     
     current_app.logger.info(f"Forwarding to {final_url}")    
