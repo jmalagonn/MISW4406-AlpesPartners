@@ -1,6 +1,0 @@
-Flask==3.0.3
-gunicorn==21.2.0
-SQLAlchemy==2.0.31
-psycopg2-binary==2.9.9
-celery==5.4.0
-python-dotenv==1.0.1
