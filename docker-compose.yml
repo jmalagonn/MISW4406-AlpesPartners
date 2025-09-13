@@ -3,8 +3,10 @@ services:
     image: apachepulsar/pulsar:3.2.0
     command: ["bash","-c","bin/pulsar standalone --no-functions-worker"]
     ports: ["6650:6650", "8090:8090"]
+    environment:
+      PULSAR_PREFIX_advertisedAddress: pulsar 
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/admin/v2/brokers/health || exit 1"]
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8090/admin/v2/brokers/health || exit 1"]
       interval: 5s
       timeout: 3s
       retries: 20
@@ -14,26 +16,17 @@ services:
     build:
       context: ./client/bff
     environment:
-      AFFILIATES_API_URL: http://affiliates:8000
-      LOYALTY_API_URL: http://loyalty:8010
       PULSAR_URL: pulsar://pulsar:6650
+      AFFILIATES_API_URL: http://affiliates:8000
+      TOPIC_COMMANDS_AFFILIATES: commands.affiliates
+      # LOYALTY_API_URL: http://loyalty:8010
+      ALLIANCES_API_URL: http://alliances:8020
       TOPIC_COMMANDS_ALLIANCES: commands.alliances
       DEBUG: "true"
     depends_on:
-      - affiliates
-      - loyalty
+      pulsar:
+        condition: service_healthy
     ports: ["8080:8080"]
-
-  mq:
-      image: rabbitmq:3-management
-      ports:
-        - "5672:5672"
-        - "15672:15672"
-      healthcheck:
-        test: ["CMD", "rabbitmq-diagnostics", "check_running"]
-        interval: 5s
-        timeout: 3s
-        retries: 20
 
   affiliates_db:
     image: postgres:16
@@ -51,7 +44,6 @@ services:
   affiliates:
     build:
       context: ./affiliates
-      dockerfile: Dockerfile.api 
     environment:
       DATABASE_URL: postgresql+psycopg2://app:app@affiliates_db:5432/app
       BROKER_URL: amqp://guest:guest@mq:5672//
@@ -59,49 +51,51 @@ services:
     depends_on:
       affiliates_db:
         condition: service_healthy
-      mq:
+      pulsar:
         condition: service_healthy
     ports: ["8000:8000"]
 
   affiliates_worker:
     build: 
       context: ./affiliates
-      dockerfile: Dockerfile.worker
     environment:
       DATABASE_URL: postgresql+psycopg2://app:app@affiliates_db:5432/app
-      BROKER_URL: amqp://guest:guest@mq:5672//
+      PULSAR_URL: pulsar://pulsar:6650
+      TOPIC_COMMANDS_AFFILIATES: commands.affiliates
+      SUBSCRIPTION_NAME: affiliates-svc
     depends_on:
       affiliates_db:
         condition: service_healthy
-      mq:
+      pulsar:
         condition: service_healthy
+    command: python -m presentation.worker
 
-  loyalty_db:
-    image: postgres:16
-    environment:
-      POSTGRES_USER: app
-      POSTGRES_PASSWORD: app
-      POSTGRES_DB: app
-    ports: ["5432"]
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U app -d app"]
-      interval: 5s
-      timeout: 3s
-      retries: 20  
+  # loyalty_db:
+  #   image: postgres:16
+  #   environment:
+  #     POSTGRES_USER: app
+  #     POSTGRES_PASSWORD: app
+  #     POSTGRES_DB: app
+  #   ports: ["5432"]
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U app -d app"]
+  #     interval: 5s
+  #     timeout: 3s
+  #     retries: 20  
 
-  loyalty:
-    build:
-      context: ./loyalty
-    environment:
-      DATABASE_URL: postgresql+psycopg2://app:app@loyalty_db:5432/app
-      BROKER_URL: amqp://guest:guest@mq:5672//
-      DEBUG: "true"
-    depends_on:
-      affiliates_db:
-        condition: service_healthy
-      mq:
-        condition: service_healthy
-    ports: ["8010:8010"]
+  # loyalty:
+  #   build:
+  #     context: ./loyalty
+  #   environment:
+  #     DATABASE_URL: postgresql+psycopg2://app:app@loyalty_db:5432/app
+  #     BROKER_URL: amqp://guest:guest@mq:5672//
+  #     DEBUG: "true"
+  #   depends_on:
+  #     affiliates_db:
+  #       condition: service_healthy
+  #     mq:
+  #       condition: service_healthy
+  #   ports: ["8010:8010"]
 
   alliances:
     build:
@@ -112,8 +106,6 @@ services:
       DEBUG: "true"
     depends_on:
       alliances_db:
-        condition: service_healthy
-      mq:
         condition: service_healthy
     ports: ["8020:8020"]
 

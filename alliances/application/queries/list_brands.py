@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from infrastructure.db.brand_repository import BrandRepository
+from infrastructure.repository.brand_repository import BrandRepository
 
 
 @dataclass

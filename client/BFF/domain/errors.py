@@ -7,7 +7,7 @@ def register_error_handlers(app):
 
     @app.errorhandler(Exception)
     def handle_generic(err):
-        app.logger.exception("Unhandled error")
+        app.logger.exception("Unhandled error", exc_info=err)
         return jsonify({"error": "internal_error"}), 500
 
 import httpx 

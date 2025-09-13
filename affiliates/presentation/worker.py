@@ -1,30 +1,49 @@
-from celery.utils.log import get_task_logger
-from infrastructure.celery_app import celery
+import os, json, logging, sys
+from infrastructure.pulsar.consumer import start_consumer
 from infrastructure.db.db import session_scope
-from application.commands.commands import CreateAffiliate, RenameAffiliate
-from application.commands.command_handlers import (
-    handle_create_affiliate, handle_rename_affiliate
+from application.commands.create_affiliate import CreateAffiliate, handle_create_affiliate
+from application.commands.rename_affiliate import RenameAffiliate, handle_rename_affiliate
+
+logging.basicConfig(
+    level=os.getenv("LOG_LEVEL", "INFO"),
+    stream=sys.stdout,
+    format="%(asctime)s %(levelname)s %(message)s"
 )
 
-log = get_task_logger(__name__)
+TOPIC_COMMANDS_AFFILIATES = os.getenv("TOPIC_COMMANDS_AFFILIATES")
+SUBSCRIPTION_NAME = os.getenv("SUBSCRIPTION_NAME")
 
-@celery.task(name="commands.create_affiliate", autoretry_for=(Exception,), retry_backoff=5, max_retries=3)
-def create_affiliate_task(payload: dict) -> dict:
-    with session_scope() as session:
-        cmd = CreateAffiliate(**payload)
-        new_id = handle_create_affiliate(cmd, session)
-        log.info("Customer created id=%s", new_id)
-        return {"id": new_id}
+def handle(payload, props):
+    logging.info("Received msg props=%s payload=%s", props, json.dumps(payload))
+    
+    command_name = props.get("name")
+    
+    if command_name == "CreateAffiliate":
+        try:    
+            with session_scope() as session:      
+                cmd = CreateAffiliate(**payload)
+                new_id = handle_create_affiliate(cmd, session)
+                
+                logging.info("Affiliate created id=%s", new_id)
+        except Exception as e:
+            logging.exception("handle_create_affiliate failed: %s", e)
+            raise
+    
+    elif command_name == "RenameAffiliate":
+        try:    
+            with session_scope() as session:      
+                cmd = RenameAffiliate(**payload)
+                handle_rename_affiliate(cmd, session)
+                
+                logging.info("Affiliate renamed id=%s", cmd.id)
+        except Exception as e:
+            logging.exception("handle_rename_affiliate failed: %s", e)
+            raise
+      
 
-@celery.task(name="commands.rename_affiliate", autoretry_for=(Exception,), retry_backoff=5, max_retries=3)
-def rename_affiliate_task(payload: dict) -> dict:
-    with session_scope() as session:
-        cmd = RenameAffiliate(**payload)
-        handle_rename_affiliate(cmd, session)
-        return {"ok": True}
-    
-@celery.task(name="events.affiliate_created")
-def publish_affiliate_created_event(event_data):
-    
-    log.info("Publishing event: %s", event_data)
-    return {"published": True}
+def main():
+    start_consumer(TOPIC_COMMANDS_AFFILIATES, SUBSCRIPTION_NAME, handle)
+
+
+if __name__ == "__main__":
+    main()

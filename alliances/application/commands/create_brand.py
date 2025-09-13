@@ -1,8 +1,8 @@
-import json, logging
+import logging
 from dataclasses import dataclass, asdict
 from domain.value_objects import Name
 from domain.models import Brand
-from infrastructure.db.brand_repository import BrandRepository
+from infrastructure.repository.brand_repository import BrandRepository
 
 @dataclass
 class CreateBrand:

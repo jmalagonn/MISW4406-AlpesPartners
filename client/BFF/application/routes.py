@@ -43,6 +43,7 @@ def loyalty_health_check():
     return _proxy_response(response)
 
 from .alliances import brand_bp
+from .affiliates import affiliate_bp
   
 def _proxy_response(upstream: requests.Response) -> Response:
     out = Response(upstream.content, status=upstream.status_code)
