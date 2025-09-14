@@ -1,11 +1,12 @@
-from infrastructure.repository import InteractionRepository
 from infrastructure.db.db import session_scope
-from application.factories.interaction_factory import InteractionFactory, InteractionMapper
+from domain.factory import InteractionFactory, InteractionMapper
+from infrastructure.event_store.postgresql_event_store import PostgreSQLEventStore
+from infrastructure.projections.projection_handler import ProjectionHandler
 
 
 class InteractionHandler:
     """
-    Handler que usa la factory para procesar comandos
+    Handler que usa Event Sourcing para procesar comandos
     """
     
     def __init__(self):
@@ -14,7 +15,7 @@ class InteractionHandler:
     
     def handle_track_interaction(self, data: dict) -> str:
         """
-        Maneja el comando de trackear interacción
+        Maneja el comando de trackear interacción usando Event Sourcing
         """
         try:
             print("Handler: Creando entidad...")
@@ -23,11 +24,20 @@ class InteractionHandler:
 
             print("Handler: Abriendo sesión de BD...")
             with session_scope() as session:
-                print("Handler: Creando repositorio...")
-                repo = InteractionRepository(session)
-                print("Handler: Agregando entidad al repositorio...")
-                repo.add(interaction)
-                print("Handler: Entidad agregada exitosamente")
+                print("Handler: Guardando eventos en Event Store...")
+                event_store = PostgreSQLEventStore(session)
+                event_store.save_events(
+                    aggregate_id=interaction.id,
+                    events=interaction.events,
+                    expected_version=0 
+                )
+                print("Handler: Eventos guardados exitosamente")
+                
+                print("Handler: Procesando proyecciones...")
+                projection_handler = ProjectionHandler(session)
+                for event in interaction.events:
+                    projection_handler.handle_event(event)
+                print("Handler: Proyecciones procesadas exitosamente")
             
             print(f"Handler: Retornando ID: {str(interaction.id)}")
             return str(interaction.id)

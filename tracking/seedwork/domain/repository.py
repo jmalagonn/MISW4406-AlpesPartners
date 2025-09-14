@@ -22,9 +22,9 @@ class Repository(ABC):
         pass
     
     @abstractmethod
-    def list(self, limit: int = 50, offset: int = 0) -> List[Any]:
+    def list(self) -> List[Any]:
         """
-        Lista entidades con paginación
+        Lista todas las entidades
         """
         pass
     

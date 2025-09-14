@@ -1,14 +1,18 @@
-from typing import List
+from typing import List, Optional
+from sqlalchemy.orm import Session
 from domain.models import Interaction
-from infrastructure.db.db_models import InteractionModel
+from infrastructure.db.db_models import InteractionModel, InteractionReadModel
 
 
 class InteractionRepository:
-    def __init__(self, session):
+    """
+    Repositorio para el write model (tabla interactions)
+    """
+    def __init__(self, session: Session):
         self.session = session
 
     def add(self, interaction: Interaction):
-        # Convertir entidad de dominio a modelo de BD
+        
         db_model = InteractionModel(
             id=interaction.id,
             interaction_type=interaction.interaction_type.value,
@@ -27,8 +31,8 @@ class InteractionRepository:
             return self._db_model_to_entity(db_model)
         return None
 
-    def list(self, limit: int = 50, offset: int = 0) -> List[Interaction]:
-        db_models = self.session.query(InteractionModel).limit(limit).offset(offset).all()
+    def list(self) -> List[Interaction]:
+        db_models = self.session.query(InteractionModel).all()
         return [self._db_model_to_entity(model) for model in db_models]
     
     def _db_model_to_entity(self, db_model: InteractionModel) -> Interaction:
@@ -44,3 +48,26 @@ class InteractionRepository:
             created_at=db_model.created_at,
             updated_on=db_model.updated_on
         )
+
+
+class InteractionReadRepository:
+    """
+    Repositorio para consultas optimizadas del read model
+    """
+    
+    def __init__(self, session: Session):
+        self.session = session
+    
+    def get_by_id(self, interaction_id: str) -> Optional[InteractionReadModel]:
+        """
+        Obtiene una interacción por su ID
+        """
+        return self.session.get(InteractionReadModel, interaction_id)
+    
+       
+    def get_all(self) -> List[InteractionReadModel]:
+        """
+        Obtiene todas las interacciones
+        """
+        return self.session.query(InteractionReadModel).all()
+    
