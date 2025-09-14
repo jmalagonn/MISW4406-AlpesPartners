@@ -102,10 +102,12 @@ services:
     build: 
       context: ./tracking
     environment:
-      DATABASE_URL: postgresql+psycopg2://app:app@affiliates_db:5432/app
+      DATABASE_URL: postgresql+psycopg2://app:app@tracking_db:5432/app
       PULSAR_URL: pulsar://pulsar:6650
       TOPIC_COMMANDS_TRACKING: commands.tracking
+      TOPIC_EVENTS_TRACKING: events.tracking
       SUBSCRIPTION_NAME: tracking-svc
+      BENCHMARK_MODE: "false"   # true solo para la prueba de capacidad
     depends_on:
       tracking_db:
         condition: service_healthy
