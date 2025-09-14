@@ -42,6 +42,44 @@ def loyalty_health_check():
 
     return _proxy_response(response)
 
+@bp.post("/track")
+def track_client():
+    payload = request.get_json(silent=True)
+    if not payload:
+        return jsonify({"error": "invalid_json"}), 400
+
+    client_id = payload.get("clientId")
+    if not client_id:
+        return jsonify({"error": "clientId required"}), 400
+
+    event = {
+        "eventType": "ClientTracked",
+        "clientId": client_id,
+        "campaignId": payload.get("campaignId", "default"),
+        "metadata": payload.get("metadata", {}),
+        "timestamp": payload.get("timestamp") or __import__("datetime").datetime.utcnow().isoformat()
+    }
+
+    # Callback para logging
+    def on_publish_done(exc):
+        if exc:
+            current_app.logger.exception(
+                "Failed to publish tracking event for client=%s campaign=%s", client_id, event["campaignId"]
+            )
+        else:
+            current_app.logger.info(
+                "PUBLISHED tracking event for client=%s campaign=%s", client_id, event["campaignId"]
+            )
+
+    try:
+        pulsar_ext.publish_event("command.tracking", event, callback=on_publish_done)
+    except Exception as exc:
+        current_app.logger.exception("Failed to queue tracking event")
+        return jsonify({"error": "publish_failed", "detail": str(exc)}), 500
+
+    # Retorna 202 inmediatamente
+    return jsonify({"status": "accepted", "event": event}), 202
+
 from .alliances import brand_bp
 from .affiliates import affiliate_bp
   
