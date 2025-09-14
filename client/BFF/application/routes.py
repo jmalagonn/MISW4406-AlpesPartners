@@ -60,7 +60,6 @@ def track_client():
         "timestamp": payload.get("timestamp") or __import__("datetime").datetime.utcnow().isoformat()
     }
 
-    # Callback para logging
     def on_publish_done(exc):
         if exc:
             current_app.logger.exception(
@@ -77,7 +76,6 @@ def track_client():
         current_app.logger.exception("Failed to queue tracking event")
         return jsonify({"error": "publish_failed", "detail": str(exc)}), 500
 
-    # Retorna 202 inmediatamente
     return jsonify({"status": "accepted", "event": event}), 202
 
 from .alliances import brand_bp
