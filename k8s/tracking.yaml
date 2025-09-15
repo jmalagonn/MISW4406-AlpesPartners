@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tracking
+  namespace: alpes-experiment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tracking
+  template:
+    metadata:
+      labels:
+        app: tracking
+    spec:
+      containers:
+      - name: tracking-api
+        image: gcr.io/desarrolloswcloud/tracking:latest
+        ports:
+        - containerPort: 8010
+        env:
+        - name: DATABASE_URL
+          value: "postgresql+psycopg2://app:app@postgres:5432/app"
+        - name: PULSAR_URL
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: PULSAR_URL
+        - name: DEBUG
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: DEBUG
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+      - name: tracking-worker
+        image: gcr.io/desarrolloswcloud/tracking:latest
+        command: ["python", "-m", "presentation.worker"]
+        env:
+        - name: DATABASE_URL
+          value: "postgresql+psycopg2://app:app@postgres:5432/app"
+        - name: PULSAR_URL
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: PULSAR_URL
+        - name: TOPIC_COMMANDS_TRACKING
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: TOPIC_COMMANDS_TRACKING
+        - name: SUBSCRIPTION_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: SUBSCRIPTION_NAME_TRACKING
+        - name: BENCHMARK_MODE
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: BENCHMARK_MODE
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: LOG_LEVEL
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tracking
+  namespace: alpes-experiment
+spec:
+  selector:
+    app: tracking
+  ports:
+  - port: 8010
+    targetPort: 8010
+  type: ClusterIP

@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pulsar
+  namespace: alpes-experiment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pulsar
+  template:
+    metadata:
+      labels:
+        app: pulsar
+    spec:
+      containers:
+      - name: pulsar
+        image: apachepulsar/pulsar:3.2.0
+        command: ["bash","-c","bin/pulsar standalone --no-functions-worker --no-stream-storage"]
+        ports:
+        - containerPort: 6650
+          name: pulsar
+        - containerPort: 8080
+          name: admin
+        env:
+        - name: PULSAR_PREFIX_advertisedAddress
+          value: "pulsar"
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "200m"
+          limits:
+            memory: "4Gi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /admin/v2/brokers/health
+            port: 8080
+          initialDelaySeconds: 120
+          periodSeconds: 60
+          timeoutSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /admin/v2/brokers/health
+            port: 8080
+          initialDelaySeconds: 90
+          periodSeconds: 30
+          timeoutSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pulsar
+  namespace: alpes-experiment
+spec:
+  selector:
+    app: pulsar
+  ports:
+  - name: pulsar
+    port: 6650
+    targetPort: 6650
+  - name: admin
+    port: 8080
+    targetPort: 8080
+  type: ClusterIP

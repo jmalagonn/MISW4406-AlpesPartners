@@ -35,6 +35,10 @@ def create_app():
     def health():
         return {"status": "ok"}, 200
 
+    @app.get("/")
+    def root():
+        return {"status": "ok", "message": "BFF Service is running"}, 200
+
     return app
 
 import os 

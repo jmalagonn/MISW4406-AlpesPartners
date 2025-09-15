@@ -10,5 +10,7 @@ class Settings:
     DEFAULT_TIMEOUT = float(os.environ.get("DEFAULT_TIMEOUT", "2.0"))
     ALLIANCES_API_URL = os.getenv("ALLIANCES_API_URL")
     TOPIC_COMMANDS_ALLIANCES = os.getenv("TOPIC_COMMANDS_ALLIANCES")
+    TRACKING_API_URL = os.getenv("TRACKING_API_URL")
+    TOPIC_COMMANDS_TRACKING = os.getenv("TOPIC_COMMANDS_TRACKING")
 
 settings = Settings()

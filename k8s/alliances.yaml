@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alliances
+  namespace: alpes-experiment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: alliances
+  template:
+    metadata:
+      labels:
+        app: alliances
+    spec:
+      containers:
+      - name: alliances-api
+        image: gcr.io/desarrolloswcloud/alliances:latest
+        ports:
+        - containerPort: 8020
+        env:
+        - name: DATABASE_URL
+          value: "postgresql+psycopg2://app:app@postgres:5432/app"
+        - name: PULSAR_URL
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: PULSAR_URL
+        - name: DEBUG
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: DEBUG
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+      - name: alliances-worker
+        image: gcr.io/desarrolloswcloud/alliances:latest
+        command: ["python", "-m", "presentation.worker"]
+        env:
+        - name: DATABASE_URL
+          value: "postgresql+psycopg2://app:app@postgres:5432/app"
+        - name: PULSAR_URL
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: PULSAR_URL
+        - name: TOPIC_COMMANDS_ALLIANCES
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: TOPIC_COMMANDS_ALLIANCES
+        - name: SUBSCRIPTION_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: SUBSCRIPTION_NAME_ALLIANCES
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: LOG_LEVEL
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: alliances
+  namespace: alpes-experiment
+spec:
+  selector:
+    app: alliances
+  ports:
+  - port: 8020
+    targetPort: 8020
+  type: ClusterIP
