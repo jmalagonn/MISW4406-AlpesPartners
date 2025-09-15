@@ -1,7 +1,7 @@
-import os, json, logging, sys
 import os, json, logging, sys, time
 from infrastructure.pulsar.consumer import start_consumer
 from infrastructure.db.projections import ensure_projection, increment_status
+from application.handlers.interaction_handler import InteractionHandler
 
 logging.basicConfig(
     level=os.getenv("LOG_LEVEL", "INFO"),
@@ -24,7 +24,31 @@ def handle(payload, props):
     logging.info("CAPACITY BENCH processed_ms=%d", ts_ms)
     return
 
-  increment_status(status="ok")
+  command_name = props.get("name", "")
+  
+  if command_name == "TrackInteraction":
+    handle_track_interaction_command(payload, props)
+  else:
+    # Comportamiento por defecto para otros comandos
+    increment_status(status="ok")
+
+
+def handle_track_interaction_command(payload, props):
+    """
+    Maneja el comando TrackInteraction desde Pulsar
+    """
+    try:
+        
+        handler = InteractionHandler()
+        interaction_id = handler.handle_track_interaction(payload)
+        
+        logging.info("Interaction tracked successfully: %s", interaction_id)
+        
+        increment_status(status="ok")
+        
+    except Exception as e:
+        logging.error("Error processing TrackInteraction command: %s", str(e))
+        increment_status(status="error")
 
 def main():
   ensure_projection()  # crea tabla de proyección si no existe

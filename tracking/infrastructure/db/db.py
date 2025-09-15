@@ -27,4 +27,12 @@ def session_scope():
         session.close()
 
 def init_db():
+    # Crear esquemas necesarios para CQRS
+    with engine.connect() as connection:
+        from sqlalchemy import text
+        connection.execute(text("CREATE SCHEMA IF NOT EXISTS read;"))
+        connection.execute(text("GRANT ALL PRIVILEGES ON SCHEMA read TO CURRENT_USER;"))
+        connection.commit()
+    
+    # Crear todas las tablas
     Base.metadata.create_all(bind=engine)
