@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: affiliates
+  namespace: alpes-experiment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: affiliates
+  template:
+    metadata:
+      labels:
+        app: affiliates
+    spec:
+      containers:
+      - name: affiliates-api
+        image: gcr.io/desarrolloswcloud/affiliates:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: DATABASE_URL
+          value: "postgresql+psycopg2://app:app@postgres:5432/app"
+        - name: PULSAR_URL
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: PULSAR_URL
+        - name: DEBUG
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: DEBUG
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+      - name: affiliates-worker
+        image: gcr.io/desarrolloswcloud/affiliates:latest
+        command: ["python", "-m", "presentation.worker"]
+        env:
+        - name: DATABASE_URL
+          value: "postgresql+psycopg2://app:app@postgres:5432/app"
+        - name: PULSAR_URL
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: PULSAR_URL
+        - name: TOPIC_COMMANDS_AFFILIATES
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: TOPIC_COMMANDS_AFFILIATES
+        - name: SUBSCRIPTION_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: SUBSCRIPTION_NAME_AFFILIATES
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: LOG_LEVEL
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: affiliates
+  namespace: alpes-experiment
+spec:
+  selector:
+    app: affiliates
+  ports:
+  - port: 8000
+    targetPort: 8000
+  type: ClusterIP
