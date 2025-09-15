@@ -1,7 +1,10 @@
+import os
 from flask import Blueprint, Response, current_app, request, jsonify
 import requests
 from infrastructure.pulsar_ext import pulsar_ext
 from infrastructure.bff_http import make_client, forward_headers
+
+TOPIC_COMMANDS_TRACKING = os.getenv("TOPIC_COMMANDS_TRACKING")
 
 _HOP_BY_HOP = {
     "connection", "keep-alive", "proxy-authenticate", "proxy-authorization",
@@ -71,7 +74,7 @@ def track_client():
             )
 
     try:
-        pulsar_ext.publish_event("command.tracking", event, callback=on_publish_done)
+        pulsar_ext.publish_event(TOPIC_COMMANDS_TRACKING, event, callback=on_publish_done)
     except Exception as exc:
         current_app.logger.exception("Failed to queue tracking event")
         return jsonify({"error": "publish_failed", "detail": str(exc)}), 500
