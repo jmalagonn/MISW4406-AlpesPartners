@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: alpes-experiment
+data:
+  DEBUG: "false"
+  LOG_LEVEL: "INFO"
+  PULSAR_URL: "pulsar://pulsar:6650"
+  TOPIC_COMMANDS_TRACKING: "commands.tracking"
+  TOPIC_COMMANDS_AFFILIATES: "commands.affiliates"
+  TOPIC_COMMANDS_ALLIANCES: "commands.alliances"
+  SUBSCRIPTION_NAME_TRACKING: "tracking-svc"
+  SUBSCRIPTION_NAME_AFFILIATES: "affiliates-svc"
+  SUBSCRIPTION_NAME_ALLIANCES: "alliances-svc"
+  BENCHMARK_MODE: "false"
