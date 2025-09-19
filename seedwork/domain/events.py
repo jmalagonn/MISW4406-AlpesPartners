@@ -1,15 +1,15 @@
 import uuid
 from dataclasses import dataclass, field
-from datetime import datetime
 from .rules import EntityIdIsImmutable
 from .exceptions import IdMustBeImmutableException
+from datetime import datetime
 
 @dataclass
-class Entity:
+class DomainEvent():
     id: uuid.UUID = field(hash=True)
     _id: uuid.UUID = field(init=False, repr=False, hash=True)
     created_on: datetime =  field(default=datetime.now())
-    updated_on: datetime = field(default=datetime.now())
+
 
     @classmethod
     def next_id(self) -> uuid.UUID:

@@ -15,3 +15,19 @@ class BusinessRule(ABC):
 
     def __str__(self) -> str:
         return f"{self.__class__.__name__} - {self.__message}"
+    
+    
+class EntityIdIsImmutable(BusinessRule):
+
+    entity: object
+
+    def __init__(self, entity, message="The entity identifier must be immutable"):
+        super().__init__(message)
+        self.entity = entity
+
+    def is_valid(self) -> bool:
+        try:
+            if self.entity._id:
+                return False
+        except AttributeError:
+            return True
