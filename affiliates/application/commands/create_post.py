@@ -21,7 +21,7 @@ class CreatePost(Command):
 class CreatePostHandler(CommandHandler):
     def __init__(self, session):
         self.session = session
-        self._fabrica_repositorio: RepositoryFactory = RepositoryFactory(session = session)
+        self.repository_factory: RepositoryFactory = RepositoryFactory(session = session)
         self.post_factory: PostFactory = PostFactory()
         
     @override

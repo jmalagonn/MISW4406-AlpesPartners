@@ -1,4 +1,5 @@
 import os, json, logging, sys
+from affiliates.application.commands.create_post import CreatePost, CreatePostHandler
 from affiliates.infrastructure.db.db import session_scope
 from affiliates.application.commands.create_affiliate import CreateAffiliate, CreateAffiliateHandler
 from seedwork.infrastructure.pulsar.consumer import start_consumer
@@ -28,6 +29,19 @@ def handle(payload, props):
                 logging.info("Affiliate created successfully")
         except Exception as e:
             logging.exception("handle_create_affiliate failed: %s", e)
+            raise
+        
+    if command_name == "CreatePost":
+        try:    
+            with session_scope() as session:      
+                cmd = CreatePost(**payload)
+                
+                handler = CreatePostHandler(session)        
+                handler.handle(cmd)
+                
+                logging.info("Post created successfully")
+        except Exception as e:
+            logging.exception("handle_create_post failed: %s", e)
             raise
       
 

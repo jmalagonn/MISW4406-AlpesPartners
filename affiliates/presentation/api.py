@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify
+from affiliates.application.queries.get_posts_query import GetPostsQueryHandler
 from affiliates.infrastructure.db.db import session_scope
 from affiliates.application.queries.query_handlers import handle_list_affiliates
 
@@ -14,3 +15,15 @@ def list_affiliates():
         data = handle_list_affiliates(s)
         
     return jsonify(data), 200
+
+
+@bp.get("/posts")
+def get_posts():
+    with session_scope() as s:
+        handler = GetPostsQueryHandler(session = s)
+        data = handler.handle()
+        
+    return jsonify(data), 200
+
+
+

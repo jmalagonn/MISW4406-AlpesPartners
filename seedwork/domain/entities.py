@@ -10,8 +10,8 @@ from seedwork.domain.exceptions import IdMustBeImmutableException
 class Entity:
     id: uuid.UUID = field(hash=True)
     _id: uuid.UUID = field(init=False, repr=False, hash=True)
-    created_on: datetime =  field(default=datetime.now())
-    updated_on: datetime = field(default=datetime.now())
+    created_at: datetime =  field(default=datetime.now())
+    updated_at: datetime = field(default=datetime.now())
 
     @classmethod
     def next_id(self) -> uuid.UUID:

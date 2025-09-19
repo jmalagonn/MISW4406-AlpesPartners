@@ -1,7 +1,8 @@
 services:
   pulsar:
     image: apachepulsar/pulsar:3.2.0
-    command: ["bash","-c","bin/pulsar standalone --no-functions-worker"]
+    command: ["bash","-c","bin/pulsar standalone --no-functions-worker --wipe-data"]
+    restart: on-failure
     ports: ["6650:6650", "8090:8080"]
     environment:
       PULSAR_PREFIX_advertisedAddress: pulsar 

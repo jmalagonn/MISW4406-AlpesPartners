@@ -39,7 +39,7 @@ class SagaCoordinator(ABC):
 
 class Step():
     corr_id: uuid.UUID
-    created_on: datetime.datetime
+    created_at: datetime.datetime
     index: int
     
     

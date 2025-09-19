@@ -8,7 +8,7 @@ from datetime import datetime
 class DomainEvent():
     id: uuid.UUID = field(hash=True)
     _id: uuid.UUID = field(init=False, repr=False, hash=True)
-    created_on: datetime =  field(default=datetime.now())
+    created_at: datetime =  field(default=datetime.now())
 
 
     @classmethod

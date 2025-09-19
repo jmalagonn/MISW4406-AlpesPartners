@@ -12,7 +12,13 @@ class PostsRepositoryDB(PostsRepository):
     
     @override    
     def add(self, post: Post):
-        orm_obj = PostDBModel(id=post.id, name=str(post.name), created_at=post.created_at)
+        orm_obj = PostDBModel(
+            id=post.id,
+            title=post.title,
+            content=post.content,
+            affiliate_id=post.affiliate_id,
+            brand_id=post.brand_id
+        )
         self.session.add(orm_obj)
     
     @override    
@@ -26,7 +32,15 @@ class PostsRepositoryDB(PostsRepository):
     def get_all(self) -> List[Post]:
         stmt = select(PostDBModel).order_by(PostDBModel.created_at.desc())
         orm_objs = self.session.execute(stmt).scalars().all()
-        return [Post(id=o.id, name=o.name, created_at=o.created_at) for o in orm_objs]
+        return [
+            Post(
+                id=orm.id, 
+                title=orm.title, 
+                content=orm.content, 
+                affiliate_id=orm.affiliate_id, 
+                brand_id=orm.brand_id, 
+                created_at=orm.created_at) 
+            for orm in orm_objs]
     
 
     @override
