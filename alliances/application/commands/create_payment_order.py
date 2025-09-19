@@ -1,7 +1,8 @@
 import uuid
+from typing import override
 from dataclasses import dataclass
 from alliances.application.dto import CreatePaymentOrderDTO
-from alliances.infrastructure.factories.factory_repository import FactoryRepository
+from alliances.infrastructure.factories.brand_factory import RepositoryFactory
 from seedwork.application.commands import Command, CommandHandler
 
 
@@ -13,9 +14,11 @@ class CreatePaymentOrder(Command):
     
 
 class CreatePaymentOrderHandler(CommandHandler):
-    def __init__(self):
-        self.factory_repository: FactoryRepository = FactoryRepository()
-        
+    def __init__(self, session):
+        self.session = session
+        self.repository_factory: RepositoryFactory = RepositoryFactory(session = session)
+    
+    @override
     def handle(self, command: CreatePaymentOrder):
         print(f"Handling CreatePaymentOrder command: {command}")
       

@@ -19,10 +19,10 @@ def handle(payload, props):
   if props.get("name") == "CreateBrand":
     try:    
       with session_scope() as session:      
-        dto = CreateBrand(**payload)
+        cmd = CreateBrand(**payload)
         
         handler = CreateBrandHandler(session)        
-        handler.handle(dto)
+        handler.handle(cmd)
         
         logging.info("Brand created successfully")
     except Exception as e:

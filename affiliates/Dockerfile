@@ -9,11 +9,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 
-COPY requirements.txt .
+COPY ./affiliates/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+COPY seedwork/ ./seedwork/
+COPY affiliates/ ./affiliates/
 
-EXPOSE 8000
+ENV PYTHONPATH=/app
 
-CMD ["gunicorn", "-b", "0.0.0.0:8000", "wsgi:app"]
+EXPOSE 8020
+
+CMD ["gunicorn", "-b", "0.0.0.0:8020", "affiliates.wsgi:app"]

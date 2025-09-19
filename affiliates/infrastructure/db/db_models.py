@@ -6,7 +6,7 @@ from datetime import datetime
 class Base(DeclarativeBase):
     pass
 
-class AffiliateModel(Base):
+class AffiliateDBModel(Base):
     __tablename__ = "affiliates"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
