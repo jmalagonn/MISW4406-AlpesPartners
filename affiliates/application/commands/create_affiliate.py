@@ -4,9 +4,9 @@ from typing import override
 from affiliates.application.dto import AffiliateDTO
 from affiliates.application.mappers import AffiliateMapper
 from affiliates.domain.factories import AffiliateFactory
-from affiliates.infrastructure.factories.affiliate_factory import RepositoryFactory
-from affiliates.domain.models import Affiliate
-from affiliates.infrastructure.repository import AffiliateRepository
+from affiliates.infrastructure.factories import RepositoryFactory
+from affiliates.domain.entities import Affiliate
+from affiliates.infrastructure.repository.affiliate_repository import AffiliateRepository
 from seedwork.application.commands import CommandHandler
 
 

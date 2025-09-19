@@ -4,3 +4,7 @@ from seedwork.domain.repositories import Repository
 
 class AffiliateRepository(Repository, ABC):
     ...
+    
+    
+class PostsRepository(Repository, ABC):
+    ...

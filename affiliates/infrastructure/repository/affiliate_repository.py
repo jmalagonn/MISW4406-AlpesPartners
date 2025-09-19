@@ -1,7 +1,7 @@
 from typing import Optional, List, override
 from uuid import UUID
 from sqlalchemy import select
-from affiliates.domain.models import Affiliate
+from affiliates.domain.entities import Affiliate
 from affiliates.infrastructure.db.db_models import AffiliateDBModel
 from affiliates.domain.repositories import AffiliateRepository
 from seedwork.domain.entities import Entity

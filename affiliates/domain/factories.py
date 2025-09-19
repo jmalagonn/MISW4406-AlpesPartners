@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from affiliates.domain.models import Affiliate, Entity
+from affiliates.domain.entities import Affiliate, Entity, Post
 from seedwork.domain.events import DomainEvent
 from seedwork.domain.factories import Factory
 from seedwork.domain.repositories import Mapper
@@ -13,4 +13,15 @@ class AffiliateFactory(Factory):
         else:
             affiliate: Affiliate = mapper.dto_to_entity(obj)
             
-            return affiliate  
+            return affiliate
+        
+        
+@dataclass
+class PostFactory(Factory):
+    def create_object(self, obj: any, mapper: Mapper) -> any:
+        if isinstance(obj, Entity) or isinstance(obj, DomainEvent):
+            return mapper.entity_to_dto(obj)
+        else:
+            post: Post = mapper.dto_to_entity(obj)
+            
+            return post  

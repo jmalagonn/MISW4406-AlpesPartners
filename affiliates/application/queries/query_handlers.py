@@ -1,4 +1,4 @@
-from affiliates.infrastructure.repository import AffiliateRepositoryDB
+from affiliates.infrastructure.repository.affiliate_repository import AffiliateRepositoryDB
 
 
 def handle_list_affiliates(session):
