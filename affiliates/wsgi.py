@@ -1,2 +1,2 @@
-from __init__ import create_app
+from affiliates import create_app
 app = create_app()

@@ -17,6 +17,6 @@ COPY affiliates/ ./affiliates/
 
 ENV PYTHONPATH=/app
 
-EXPOSE 8020
+EXPOSE 8000
 
-CMD ["gunicorn", "-b", "0.0.0.0:8020", "affiliates.wsgi:app"]
+CMD ["gunicorn", "-b", "0.0.0.0:8000", "affiliates.wsgi:app"]

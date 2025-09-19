@@ -44,7 +44,8 @@ services:
 
   affiliates:
     build:
-      context: ./affiliates
+      context: .
+      dockerfile: ./affiliates/Dockerfile
     environment:
       DATABASE_URL: postgresql+psycopg2://app:app@affiliates_db:5432/app
       PULSAR_URL: pulsar://pulsar:6650
@@ -58,7 +59,8 @@ services:
 
   affiliates_worker:
     build: 
-      context: ./affiliates
+      context: .
+      dockerfile: ./affiliates/Dockerfile
     environment:
       DATABASE_URL: postgresql+psycopg2://app:app@affiliates_db:5432/app
       PULSAR_URL: pulsar://pulsar:6650
@@ -69,7 +71,7 @@ services:
         condition: service_healthy
       pulsar:
         condition: service_healthy
-    command: python -m presentation.worker
+    command: python -m affiliates.presentation.worker
 
   tracking_db:
     image: postgres:16

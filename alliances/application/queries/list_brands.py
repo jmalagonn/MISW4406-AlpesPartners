@@ -4,11 +4,10 @@ from alliances.infrastructure.repository.brand_repository import BrandRepository
 
 @dataclass
 class ListBrands:
-    limit: int = 50
-    offset: int = 0
+    ...
     
 
-def handle_list_brands(q, session):
+def handle_list_brands(session):
     repo = BrandRepositoryDB(session)
     rows = repo.get_all()
     

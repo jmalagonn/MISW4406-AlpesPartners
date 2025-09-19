@@ -5,8 +5,8 @@ from affiliates.application.dto import AffiliateDTO
 from affiliates.application.mappers import AffiliateMapper
 from affiliates.domain.factories import AffiliateFactory
 from affiliates.infrastructure.factories.affiliate_factory import RepositoryFactory
-from domain.models import Affiliate
-from infrastructure.repository import AffiliateRepository
+from affiliates.domain.models import Affiliate
+from affiliates.infrastructure.repository import AffiliateRepository
 from seedwork.application.commands import CommandHandler
 
 
