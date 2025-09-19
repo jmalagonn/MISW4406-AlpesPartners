@@ -1,7 +1,6 @@
 from dataclasses import dataclass, field
 import uuid
 from seedwork.domain.entities import Entity, RootAggregate
-from .value_objects import Name
 
 
 @dataclass
@@ -21,8 +20,8 @@ class Post(RootAggregate):
     affiliate_id: uuid.UUID = field(default=None)
     brand_id: uuid.UUID = field(default=None)
     
-    def create_post(self, post: Post):
-        self.title = post.title
-        self.content = post.content
-        self.affiliate_id = post.affiliate_id
-        self.brand_id = post.brand_id
+    def create_post(self, title: str, content: str, affiliate_id: uuid.UUID, brand_id: uuid.UUID):
+        self.title = title
+        self.content = content
+        self.affiliate_id = affiliate_id
+        self.brand_id = brand_id
