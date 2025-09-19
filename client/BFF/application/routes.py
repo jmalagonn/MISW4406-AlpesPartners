@@ -1,6 +1,5 @@
-from flask import Blueprint, Response, current_app, request, jsonify
 import requests
-from infrastructure.pulsar_ext import pulsar_ext
+from flask import Blueprint, Response, current_app, request
 from infrastructure.bff_http import make_client, forward_headers
 
 _HOP_BY_HOP = {
@@ -97,7 +96,7 @@ def create_tracking_interaction():
     return _proxy_response(response)
 
 from .alliances import brand_bp
-from .affiliates import affiliate_bp
+from .affiliates import affiliate_bp, posts_bp
   
 def _proxy_response(upstream: requests.Response) -> Response:
     out = Response(upstream.content, status=upstream.status_code)

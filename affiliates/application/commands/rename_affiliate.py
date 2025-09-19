@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from infrastructure.repository import AffiliateRepository
+from affiliates.infrastructure.repository.affiliate_repository import AffiliateRepository
 
 @dataclass
 class RenameAffiliate:

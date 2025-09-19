@@ -1,17 +1,36 @@
-from dataclasses import dataclass
-from domain.models import Affiliate
-from domain.value_objects import Name
-from infrastructure.repository import AffiliateRepository
+import logging
+from dataclasses import asdict, dataclass
+from typing import override
+from affiliates.application.dto import AffiliateDTO
+from affiliates.application.mappers import AffiliateMapper
+from affiliates.domain.factories import AffiliateFactory
+from affiliates.infrastructure.factories import RepositoryFactory
+from affiliates.domain.entities import Affiliate
+from affiliates.infrastructure.repository.affiliate_repository import AffiliateRepository
+from seedwork.application.commands import CommandHandler
 
 
 @dataclass
 class CreateAffiliate:
     name: str
-    
-    
-def handle_create_affiliate(cmd, session) -> str:
-    repo = AffiliateRepository(session)   
-    a = Affiliate(name=Name((cmd.name or "").strip()))
-    repo.add(a)
+
+
+class CreateAffiliateHandler(CommandHandler):
+    def __init__(self, session):
+        self.session = session
+        self.repository_factory: RepositoryFactory = RepositoryFactory(session = session)
+        self.affiliate_factory: AffiliateFactory = AffiliateFactory()
         
-    return a.id
+    @override
+    def handle(self, command: CreateAffiliate):
+        logging.info("Received command=%s", asdict(command))
+        
+        brand_dto = AffiliateDTO(name=command.name)
+        
+        repo: AffiliateRepository = self.repository_factory.create_object(AffiliateRepository)
+        affiliate: Affiliate = self.affiliate_factory.create_object(brand_dto, AffiliateMapper())
+        
+        repo.add(affiliate)
+        self.session.commit()
+        
+        logging.info("Affiliate created with id=%s", affiliate.id)

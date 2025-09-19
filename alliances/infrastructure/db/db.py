@@ -1,7 +1,7 @@
 from contextlib import contextmanager
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
-from config import settings
+from alliances.config import settings
 from .db_models import Base
 
 engine = create_engine(

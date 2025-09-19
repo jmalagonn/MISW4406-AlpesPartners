@@ -1,8 +1,8 @@
 import os, json, logging, sys
-from infrastructure.pulsar.consumer import start_consumer
-from infrastructure.db.db import session_scope
-from application.commands.create_affiliate import CreateAffiliate, handle_create_affiliate
-from application.commands.rename_affiliate import RenameAffiliate, handle_rename_affiliate
+from affiliates.application.commands.create_post import CreatePost, CreatePostHandler
+from affiliates.infrastructure.db.db import session_scope
+from affiliates.application.commands.create_affiliate import CreateAffiliate, CreateAffiliateHandler
+from seedwork.infrastructure.pulsar.consumer import start_consumer
 
 logging.basicConfig(
     level=os.getenv("LOG_LEVEL", "INFO"),
@@ -22,22 +22,26 @@ def handle(payload, props):
         try:    
             with session_scope() as session:      
                 cmd = CreateAffiliate(**payload)
-                new_id = handle_create_affiliate(cmd, session)
                 
-                logging.info("Affiliate created id=%s", new_id)
+                handler = CreateAffiliateHandler(session)        
+                handler.handle(cmd)
+                
+                logging.info("Affiliate created successfully")
         except Exception as e:
             logging.exception("handle_create_affiliate failed: %s", e)
             raise
-    
-    elif command_name == "RenameAffiliate":
+        
+    if command_name == "CreatePost":
         try:    
             with session_scope() as session:      
-                cmd = RenameAffiliate(**payload)
-                handle_rename_affiliate(cmd, session)
+                cmd = CreatePost(**payload)
                 
-                logging.info("Affiliate renamed id=%s", cmd.id)
+                handler = CreatePostHandler(session)        
+                handler.handle(cmd)
+                
+                logging.info("Post created successfully")
         except Exception as e:
-            logging.exception("handle_rename_affiliate failed: %s", e)
+            logging.exception("handle_create_post failed: %s", e)
             raise
       
 

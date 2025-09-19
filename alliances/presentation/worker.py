@@ -1,7 +1,7 @@
 import os, json, logging, sys
-from infrastructure.pulsar.consumer import start_consumer
-from infrastructure.db.db import session_scope
-from application.commands.create_brand import CreateBrand, handle_create_brand
+from seedwork.infrastructure.pulsar.consumer import start_consumer
+from alliances.infrastructure.db.db import session_scope
+from alliances.application.commands.create_brand import CreateBrand, CreateBrandHandler
 
 logging.basicConfig(
     level=os.getenv("LOG_LEVEL", "INFO"),
@@ -19,10 +19,12 @@ def handle(payload, props):
   if props.get("name") == "CreateBrand":
     try:    
       with session_scope() as session:      
-        dto = CreateBrand(**payload)            
-        new_id = handle_create_brand(dto, session)
+        cmd = CreateBrand(**payload)
         
-        logging.info("Brand created id=%s", new_id)
+        handler = CreateBrandHandler(session)        
+        handler.handle(cmd)
+        
+        logging.info("Brand created successfully")
     except Exception as e:
         logging.exception("handle_create_brand failed: %s", e)
         raise

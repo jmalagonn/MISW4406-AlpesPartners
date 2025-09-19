@@ -1,7 +1,7 @@
-from flask import Blueprint, request, jsonify
-from infrastructure.db.db import session_scope
-from application.queries.queries import GetAffiliateById, ListAffiliates
-from application.queries.query_handlers import handle_get_affiliate_by_id, handle_list_affiliates
+from flask import Blueprint, jsonify
+from affiliates.application.queries.get_posts_query import GetPostsQueryHandler
+from affiliates.infrastructure.db.db import session_scope
+from affiliates.application.queries.query_handlers import handle_list_affiliates
 
 bp = Blueprint("affiliates", __name__, url_prefix="/affiliates")
 
@@ -11,16 +11,19 @@ def health():
 
 @bp.get("/")
 def list_affiliates():
-    limit = int(request.args.get("limit", 50))
-    offset = int(request.args.get("offset", 0))
     with session_scope() as s:
-        data = handle_list_affiliates(ListAffiliates(limit=limit, offset=offset), s)
+        data = handle_list_affiliates(s)
+        
     return jsonify(data), 200
 
-@bp.get("/<affiliate_id>")
-def get_affiliate(affiliate_id: str):
+
+@bp.get("/posts")
+def get_posts():
     with session_scope() as s:
-        data = handle_get_affiliate_by_id(GetAffiliateById(affiliate_id=affiliate_id), s)
-    if not data:
-        return {"error": "not found"}, 404
+        handler = GetPostsQueryHandler(session = s)
+        data = handler.handle()
+        
     return jsonify(data), 200
+
+
+
