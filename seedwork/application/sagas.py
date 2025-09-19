@@ -44,22 +44,22 @@ class Step():
     
     
 @dataclass
-class Inicio(Step):
+class Start(Step):
     index: int = 0
     
     
 @dataclass
-class Ent(Step):
+class End(Step):
     ...
     
     
 @dataclass
 class Transaction(Step):
     
-    comando: Command
-    evento: DomainEvent
+    command: Command
+    event: DomainEvent
     error: DomainEvent
-    compensacion: Command
+    compensation: Command
     isSuccessfull: bool
     
     

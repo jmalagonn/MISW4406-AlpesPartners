@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
-from application.queries.list_brands import ListBrands, handle_list_brands
-from infrastructure.db.db import session_scope
+from alliances.application.queries.list_brands import ListBrands, handle_list_brands
+from alliances.infrastructure.db.db import session_scope
 
 
 bp = Blueprint("alliances", __name__, url_prefix="/alliances")

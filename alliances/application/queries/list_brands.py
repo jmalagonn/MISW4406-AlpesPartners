@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from infrastructure.repository.brand_repository import BrandRepository
+from alliances.infrastructure.repository.brand_repository import BrandRepositoryDB
 
 
 @dataclass
@@ -9,8 +9,8 @@ class ListBrands:
     
 
 def handle_list_brands(q, session):
-    repo = BrandRepository(session)
-    rows = repo.list(limit=q.limit, offset=q.offset)
+    repo = BrandRepositoryDB(session)
+    rows = repo.get_all()
     
     return [
       {

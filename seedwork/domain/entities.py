@@ -1,8 +1,10 @@
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime
-from .rules import EntityIdIsImmutable
-from .exceptions import IdMustBeImmutableException
+from seedwork.domain.events import DomainEvent
+from seedwork.domain.mixins import ValidateRulesMixin
+from seedwork.domain.rules import EntityIdIsImmutable
+from seedwork.domain.exceptions import IdMustBeImmutableException
 
 @dataclass
 class Entity:
@@ -24,3 +26,19 @@ class Entity:
         if not EntityIdIsImmutable(self).is_valid():
             raise IdMustBeImmutableException()
         self._id = self.next_id()
+        
+        
+@dataclass
+class RootAggregate(Entity, ValidateRulesMixin):
+    events: list[DomainEvent] = field(default_factory=list)
+    compensation_events: list[DomainEvent] = field(default_factory=list)
+
+    def add_event(self, event: DomainEvent, compansation_event: DomainEvent = None):
+        self.events.append(event)
+
+        if compansation_event:
+            self.compensation_events.append(compansation_event)
+    
+    def clean_events(self):
+        self.events = list()
+        self.compensation_events = list()

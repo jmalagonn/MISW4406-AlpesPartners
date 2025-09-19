@@ -1,9 +1,8 @@
-import logging
-import sys
+import logging, sys
 from flask import Flask
-from config import settings
-from presentation.api import bp as api_bp
-from infrastructure.db.db import init_db
+from alliances.config import settings
+from alliances.presentation.api import bp as api_bp
+from alliances.infrastructure.db.db import init_db
 
 def create_app():
     app = Flask(__name__)

@@ -150,7 +150,8 @@ services:
 
   alliances:
     build:
-      context: ./alliances
+      context: .
+      dockerfile: ./alliances/Dockerfile
     environment:
       DATABASE_URL: postgresql+psycopg2://app:app@alliances_db:5432/app
       PULSAR_URL: pulsar://pulsar:6650
@@ -175,7 +176,8 @@ services:
 
   alliances_worker:
     build: 
-      context: ./alliances
+      context: .
+      dockerfile: ./alliances/Dockerfile
     environment:
       DATABASE_URL: postgresql+psycopg2://app:app@alliances_db:5432/app
       PULSAR_URL: pulsar://pulsar:6650
@@ -186,7 +188,7 @@ services:
         condition: service_healthy
       pulsar:
         condition: service_healthy
-    command: python -m presentation.worker
+    command: python -m alliances.presentation.worker
   
   tracking_nginx:
     image: nginx:stable-alpine

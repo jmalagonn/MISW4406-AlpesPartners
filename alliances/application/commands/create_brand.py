@@ -1,20 +1,35 @@
 import logging
+from datetime import datetime
 from dataclasses import dataclass, asdict
-from domain.value_objects import Name
-from domain.models import Brand
-from infrastructure.repository.brand_repository import BrandRepository
+from typing import override
+from alliances.application.dto import BrandDTO
+from alliances.application.mappers.brand_mapper import BrandMapper
+from alliances.domain.factories.brand_factory import BrandFactory
+from alliances.domain.repositories import BrandRepository
+from alliances.domain.entities import Brand
+from alliances.infrastructure.factories.brand_factory import RepositoryFactory
+from seedwork.application.commands import Command, CommandHandler
 
 @dataclass
-class CreateBrand:
+class CreateBrand(Command):
     name: str
     
 
-def handle_create_brand(cmd: CreateBrand, session) -> str: 
-  logging.info("Received command=%s", asdict(cmd))
-  
-  brand = Brand(name=Name(cmd.name))
-  
-  repo = BrandRepository(session)
-  repo.add(brand)
-  
-  return brand.id
+class CreateBrandHandler(CommandHandler):
+    def __init__(self, session):
+        self.session = session
+        self.repository_factory: RepositoryFactory = RepositoryFactory(session = session)
+        self.brand_factory: BrandFactory = BrandFactory()
+        
+    @override
+    def handle(self, command: CreateBrand):
+        logging.info("Received command=%s", asdict(command))
+        
+        brand_dto = BrandDTO(name=command.name)
+        
+        repo: BrandRepository = self.repository_factory.create_object(BrandRepository)
+        brand: Brand = self.brand_factory.create_object(brand_dto, BrandMapper())
+        
+        repo.add(brand)
+        self.session.commit()
+        logging.info("Brand created with id=%s", brand.id)

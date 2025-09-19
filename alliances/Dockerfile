@@ -9,11 +9,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 
-COPY requirements.txt .
+COPY ./alliances/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+COPY seedwork/ ./seedwork/
+COPY alliances/ ./alliances/
+
+ENV PYTHONPATH=/app
 
 EXPOSE 8020
 
-CMD ["gunicorn", "-b", "0.0.0.0:8020", "wsgi:app"]
+CMD ["gunicorn", "-b", "0.0.0.0:8020", "alliances.wsgi:app"]
