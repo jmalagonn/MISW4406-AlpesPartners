@@ -2,6 +2,9 @@ import os, json, logging, sys, time
 from infrastructure.pulsar.consumer import start_consumer
 from infrastructure.db.projections import ensure_projection, increment_status
 from application.handlers.interaction_handler import InteractionHandler
+from application.commands.build_interactions_info import BuildInteractionsInfo, BuildInteractionsInfoHandler
+from infrastructure.db.db import session_scope
+from __init__ import create_app
 
 logging.basicConfig(
     level=os.getenv("LOG_LEVEL", "INFO"),
@@ -28,8 +31,11 @@ def handle(payload, props):
   
   if command_name == "TrackInteraction":
     handle_track_interaction_command(payload, props)
+  
+  elif command_name == "BuildInteractionsInfo":
+    handle_build_interactions_info_command(payload, props)
+  
   else:
-    # Comportamiento por defecto para otros comandos
     increment_status(status="ok")
 
 
@@ -50,9 +56,59 @@ def handle_track_interaction_command(payload, props):
         logging.error("Error processing TrackInteraction command: %s", str(e))
         increment_status(status="error")
 
+
+def handle_build_interactions_info_command(payload, props):
+    """
+    Maneja el comando BuildInteractionsInfo desde Pulsar
+    """
+    try:
+        logging.info("Processing BuildInteractionsInfo command with payload: %s", json.dumps(payload))
+        
+        # Extract command data from payload
+        command_payload = payload.get("payload", {})
+        start_date = command_payload.get("start_date")
+        end_date = command_payload.get("end_date") 
+        post_id = command_payload.get("post_id")
+        saga_id = payload.get("saga_id")
+        
+        # Validate required fields
+        if not post_id:
+            raise ValueError("post_id is required for BuildInteractionsInfo command")
+        
+        # Create command object
+        command = BuildInteractionsInfo(
+            start_date=start_date,
+            end_date=end_date,
+            post_id=post_id
+        )
+        
+        # Create environment context for the handler
+        env = {
+            "saga_id": saga_id,
+            "command_id": props.get("commandId"),
+            "correlation_id": props.get("correlationId")
+        }
+        
+        # Execute command within database session
+        with session_scope() as session:
+            handler = BuildInteractionsInfoHandler(session, env)
+            handler.handle(command)
+            session.commit()  # Ensure changes are committed
+        
+        logging.info("BuildInteractionsInfo command processed successfully for post_id: %s", post_id)
+        increment_status(status="ok")
+        
+    except Exception as e:
+        logging.error("Error processing BuildInteractionsInfo command: %s", str(e))
+        increment_status(status="error")
+
 def main():
-  ensure_projection()  # crea tabla de proyección si no existe
-  start_consumer(TOPIC_COMMANDS_TRACKING, SUBSCRIPTION_NAME, handle)
+  # Create Flask app for application context
+  app = create_app()
+  
+  with app.app_context():
+    ensure_projection()  # crea tabla de proyección si no existe
+    start_consumer(TOPIC_COMMANDS_TRACKING, SUBSCRIPTION_NAME, handle)
 
 
 if __name__ == "__main__":

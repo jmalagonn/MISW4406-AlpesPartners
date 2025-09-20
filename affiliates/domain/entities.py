@@ -15,6 +15,7 @@ class Affiliate(Entity):
 
 @dataclass
 class Post(RootAggregate):
+    id: uuid.UUID = field(default=None)
     title: str = field(default=None)
     content: str = field(default=None)
     affiliate_id: uuid.UUID = field(default=None)

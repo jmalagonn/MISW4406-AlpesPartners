@@ -1,4 +1,4 @@
-import logging
+import logging, uuid
 from dataclasses import asdict, dataclass
 from typing import override
 from affiliates.application.dto import PostDTO
@@ -28,7 +28,8 @@ class CreatePostHandler(CommandHandler):
     def handle(self, command: CreatePost):
         logging.info("Received command=%s", asdict(command))
         
-        brand_dto = PostDTO(
+        post_dto = PostDTO(
+            id=uuid.uuid4(),
             title=command.title,
             content=command.content,
             affiliate_id=command.affiliate_id,
@@ -36,7 +37,7 @@ class CreatePostHandler(CommandHandler):
         )
         
         repo: PostsRepository = self.repository_factory.create_object(PostsRepository)
-        post: Post = self.post_factory.create_object(brand_dto, PostMapper())
+        post: Post = self.post_factory.create_object(post_dto, PostMapper())
         
         repo.add(post)
         self.session.commit()

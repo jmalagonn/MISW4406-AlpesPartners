@@ -1,5 +1,5 @@
 from typing import override
-from alliances.application.dto import BrandDTO
+from alliances.application.dto.dto import BrandDTO
 from alliances.domain.entities import Brand
 from alliances.domain.value_objects import Name
 from seedwork.domain.entities import Entity
