@@ -185,7 +185,10 @@ services:
       DATABASE_URL: postgresql+psycopg2://app:app@alliances_db:5432/app
       PULSAR_URL: pulsar://pulsar:6650
       TOPIC_COMMANDS_ALLIANCES: commands.alliances
-      SUBSCRIPTION_NAME: alliances-svc
+      TOPIC_COMMANDS_AFFILIATES: commands.affiliates
+      TOPIC_EVENTS_TRACKING: events.tracking
+      ALLIANCES_SERVICE_COMMANDS: alliances-svc-commands
+      TRACKING_SERVICE_EVENTS: tracking-svc-events
     depends_on:
       alliances_db:
         condition: service_healthy

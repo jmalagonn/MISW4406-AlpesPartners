@@ -1,4 +1,5 @@
 import logging
+from affiliates.application.mappers import PostMapper
 from affiliates.domain.factories import PostFactory
 from affiliates.domain.repositories import PostsRepository
 from affiliates.infrastructure.factories import RepositoryFactory
@@ -17,4 +18,4 @@ class GetPostsQueryHandler:
         repo: PostsRepository = self.repository_factory.create_object(PostsRepository)
         posts = repo.get_all()
         
-        return posts
+        return [self.post_factory.create_object(post, PostMapper()) for post in posts]

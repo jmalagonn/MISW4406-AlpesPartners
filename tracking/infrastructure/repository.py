@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List, Optional
 from sqlalchemy.orm import Session
 from domain.models import Interaction
@@ -24,16 +25,30 @@ class InteractionRepository:
             updated_on=interaction.updated_on
         )
         self.session.add(db_model)
+        
 
     def get(self, interaction_id: str) -> Interaction:
         db_model = self.session.get(InteractionModel, interaction_id)
         if db_model:
             return self._db_model_to_entity(db_model)
         return None
+    
+    
+    def get_interations_by_post_id(self, post_id: str, start_date: Optional[datetime], end_date: Optional[datetime]):
+        query = self.session.query(InteractionModel).filter(InteractionModel.campaign_id == post_id)
+        
+        if start_date is not None:
+            query = query.filter(InteractionModel.created_at >= start_date)
+        if end_date is not None:
+            query = query.filter(InteractionModel.created_at < end_date)
+            
+        return [self._db_model_to_entity(model) for model in query]
+    
 
     def list(self) -> List[Interaction]:
         db_models = self.session.query(InteractionModel).all()
         return [self._db_model_to_entity(model) for model in db_models]
+    
     
     def _db_model_to_entity(self, db_model: InteractionModel) -> Interaction:
         """Convierte modelo de BD a entidad de dominio"""

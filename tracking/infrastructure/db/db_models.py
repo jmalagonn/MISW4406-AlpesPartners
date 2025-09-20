@@ -17,6 +17,7 @@ class EventModel(Base):
     created_at = Column(DateTime, nullable=False)
     event_metadata = Column(Text, nullable=True)
 
+
 # Write Model (Write Side)
 class InteractionModel(Base):
     __tablename__ = "interactions"
@@ -29,6 +30,7 @@ class InteractionModel(Base):
     timestamp = Column(DateTime, nullable=False)
     created_at = Column(DateTime, nullable=False)
     updated_on = Column(DateTime, nullable=False)
+
 
 # Read Model (Read Side)
 class InteractionReadModel(Base):

@@ -30,17 +30,22 @@ class PostsRepositoryDB(PostsRepository):
 
     @override
     def get_all(self) -> List[Post]:
-        stmt = select(PostDBModel).order_by(PostDBModel.created_at.desc())
+        stmt = (
+            select(PostDBModel)
+            .order_by(PostDBModel.created_at.desc(), PostDBModel.id.desc())
+        )
         orm_objs = self.session.execute(stmt).scalars().all()
         return [
-            Post(
-                id=orm.id, 
-                title=orm.title, 
-                content=orm.content, 
-                affiliate_id=orm.affiliate_id, 
-                brand_id=orm.brand_id, 
-                created_at=orm.created_at) 
-            for orm in orm_objs]
+                Post(
+                    id=orm.id,
+                    title=orm.title,
+                    content=orm.content,
+                    affiliate_id=orm.affiliate_id,
+                    brand_id=orm.brand_id,
+                    created_at=orm.created_at,
+                )
+                for orm in orm_objs
+            ]
     
 
     @override
