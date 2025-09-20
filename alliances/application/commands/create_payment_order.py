@@ -1,7 +1,7 @@
 import uuid
 from typing import override
 from dataclasses import dataclass
-from alliances.application.dto import CreatePaymentOrderDTO
+from alliances.application.dto.dto import CreatePaymentOrderDTO
 from alliances.infrastructure.factories.brand_factory import RepositoryFactory
 from seedwork.application.commands import Command, CommandHandler
 
