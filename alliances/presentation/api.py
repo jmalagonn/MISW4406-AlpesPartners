@@ -36,32 +36,46 @@ def list_brands():
 
 @bp.post("/create-payment-order")
 def close_payout():
-    body = request.get_json()
-    saga_id = uuid4()
-    
-    with session_scope() as s:
-        s.add(SagaInstance(
-            saga_id=saga_id, 
-            saga_type="CommissionPayout",
-            status="RUNNING", step=0,
-            data={
-                "post_id": body["post_id"], 
-                "start_date": body["start_date"], 
-                "end_date": body["end_date"]
-            }
-        ))
+    try:
+        body = request.get_json()
+        if not body:
+            return jsonify({"error": "Request body is required"}), 400
+            
+        # Validate required fields
+        required_fields = ["post_id", "start_date", "end_date"]
+        for field in required_fields:
+            if field not in body:
+                return jsonify({"error": f"Missing required field: {field}"}), 400
         
-        topic = settings.TOPIC_COMMANDS_TRACKING
-        env = new_envelope("command.BuildInteractionsInfo", saga_id, body)
+        saga_id = uuid4()
         
-        publish(
-            topic,
-            key=str(saga_id),
-            payload=env,
-            properties={"name": "BuildInteractionsInfo"}
-        )
-    
-    return {"saga_id": str(saga_id)}, 202
+        with session_scope() as s:
+            s.add(SagaInstance(
+                saga_id=saga_id, 
+                saga_type="CommissionPayout",
+                status="RUNNING", step=0,
+                data={
+                    "post_id": body["post_id"], 
+                    "start_date": body["start_date"], 
+                    "end_date": body["end_date"]
+                }
+            ))
+            
+            topic = settings.TOPIC_COMMANDS_TRACKING
+            env = new_envelope("command.BuildInteractionsInfo", str(saga_id), body)
+            
+            publish(
+                topic,
+                key=str(saga_id),
+                payload=env,
+                properties={"name": "BuildInteractionsInfo"}
+            )
+        
+        return {"saga_id": str(saga_id)}, 202
+        
+    except Exception as e:
+        current_app.logger.error(f"Error creating payment order: {str(e)}")
+        return jsonify({"error": f"Internal server error: {str(e)}"}), 500
 
 
 # Post Costs API Endpoints
@@ -74,18 +88,24 @@ def get_post_costs():
         filters = PostCostFiltersDTO.from_request_args(request.args)
         
         # Convert string UUIDs to UUID objects
-        if filters.post_id:
-            filters.post_id = UUID(filters.post_id)
-        if filters.affiliate_id:
-            filters.affiliate_id = UUID(filters.affiliate_id)
-        if filters.brand_id:
-            filters.brand_id = UUID(filters.brand_id)
+        try:
+            if filters.post_id:
+                filters.post_id = UUID(filters.post_id)
+            if filters.affiliate_id:
+                filters.affiliate_id = UUID(filters.affiliate_id)
+            if filters.brand_id:
+                filters.brand_id = UUID(filters.brand_id)
+        except ValueError as e:
+            return jsonify({"error": f"Invalid UUID format: {str(e)}"}), 400
         
         # Parse date strings
-        if filters.start_date:
-            filters.start_date = datetime.fromisoformat(filters.start_date.replace('Z', '+00:00'))
-        if filters.end_date:
-            filters.end_date = datetime.fromisoformat(filters.end_date.replace('Z', '+00:00'))
+        try:
+            if filters.start_date:
+                filters.start_date = datetime.fromisoformat(filters.start_date.replace('Z', '+00:00'))
+            if filters.end_date:
+                filters.end_date = datetime.fromisoformat(filters.end_date.replace('Z', '+00:00'))
+        except ValueError as e:
+            return jsonify({"error": f"Invalid date format: {str(e)}"}), 400
         
         with session_scope() as session:
             result = handle_get_post_costs(session, filters)
@@ -166,18 +186,24 @@ def get_post_costs_summary():
         filters = PostCostFiltersDTO.from_request_args(request.args)
         
         # Convert string UUIDs to UUID objects
-        if filters.post_id:
-            filters.post_id = UUID(filters.post_id)
-        if filters.affiliate_id:
-            filters.affiliate_id = UUID(filters.affiliate_id)
-        if filters.brand_id:
-            filters.brand_id = UUID(filters.brand_id)
+        try:
+            if filters.post_id:
+                filters.post_id = UUID(filters.post_id)
+            if filters.affiliate_id:
+                filters.affiliate_id = UUID(filters.affiliate_id)
+            if filters.brand_id:
+                filters.brand_id = UUID(filters.brand_id)
+        except ValueError as e:
+            return jsonify({"error": f"Invalid UUID format: {str(e)}"}), 400
         
         # Parse date strings
-        if filters.start_date:
-            filters.start_date = datetime.fromisoformat(filters.start_date.replace('Z', '+00:00'))
-        if filters.end_date:
-            filters.end_date = datetime.fromisoformat(filters.end_date.replace('Z', '+00:00'))
+        try:
+            if filters.start_date:
+                filters.start_date = datetime.fromisoformat(filters.start_date.replace('Z', '+00:00'))
+            if filters.end_date:
+                filters.end_date = datetime.fromisoformat(filters.end_date.replace('Z', '+00:00'))
+        except ValueError as e:
+            return jsonify({"error": f"Invalid date format: {str(e)}"}), 400
         
         with session_scope() as session:
             result = handle_get_post_costs_summary(session, filters)

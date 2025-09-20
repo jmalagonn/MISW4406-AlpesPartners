@@ -1,22 +1,28 @@
 services:
   pulsar:
     image: apachepulsar/pulsar:3.2.0
-    command: ["bash","-c","bin/pulsar standalone --no-functions-worker"]
+    command: ["bash","-c","bin/pulsar standalone --no-functions-worker --wipe-data"]
     restart: unless-stopped
     ports: ["6650:6650", "8090:8080"]
     environment:
       PULSAR_PREFIX_advertisedAddress: pulsar
       PULSAR_MEM: "-Xms512m -Xmx1g -XX:MaxDirectMemorySize=1g"
       PULSAR_GC: "-XX:+UseG1GC -XX:MaxGCPauseMillis=10"
+      PULSAR_PREFIX_managedLedgerDefaultEnsembleSize: 1
+      PULSAR_PREFIX_managedLedgerDefaultWriteQuorum: 1
+      PULSAR_PREFIX_managedLedgerDefaultAckQuorum: 1
+      PULSAR_PREFIX_managedLedgerDefaultMarkDeleteRateLimit: 0.0
+      PULSAR_PREFIX_brokerDeduplicationEnabled: false
+      PULSAR_PREFIX_brokerDeleteInactiveTopicsEnabled: false
     volumes:
       - pulsar_data:/pulsar/data
       - pulsar_logs:/pulsar/logs
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://localhost:8080/admin/v2/brokers/health || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 30s
+      interval: 15s
+      timeout: 10s
+      retries: 15
+      start_period: 60s
     deploy:
       resources:
         limits:
@@ -177,6 +183,8 @@ services:
       DEBUG: "true"
     depends_on:
       alliances_db:
+        condition: service_healthy
+      pulsar:
         condition: service_healthy
     ports: ["8020:8020"]
 

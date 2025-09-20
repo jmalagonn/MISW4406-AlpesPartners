@@ -41,7 +41,7 @@ def handle_interactions_info_built_event(payload, props):
             saga_instance.step = 1  # Move to next step
             session.commit()
             
-            logging.info("Updated SAGA %s with total interacions: %f", saga_id, total_interactions)
+            logging.info("Updated SAGA %s with total interactions: %d", saga_id, total_interactions)
             
             # Publish next command in the SAGA
             publish_next_saga_command(session, saga_instance)
