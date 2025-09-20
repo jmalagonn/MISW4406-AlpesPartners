@@ -50,7 +50,7 @@ def proxy_response(upstream: requests.Response) -> Response:
             out.headers[k] = v
     return out  
 
-from .alliances import brand_bp
+from .alliances import brand_bp, payment_bp
 from .affiliates import affiliate_bp, posts_bp
 from .tracking import tracking_bp
   

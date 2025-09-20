@@ -40,9 +40,14 @@ def close_payout():
     
     with session_scope() as s:
         s.add(SagaInstance(
-            saga_id=saga_id, saga_type="CommissionPayout",
+            saga_id=saga_id, 
+            saga_type="CommissionPayout",
             status="RUNNING", step=0,
-            data={"brand_id": body["brand_id"], "affiliate_id": body["affiliate_id"], "period": body["period"]}
+            data={
+                "post_id": body["post_id"], 
+                "start_date": body["start_date"], 
+                "end_date": body["end_date"]
+            }
         ))
         
         topic = current_app.config["TOPIC_COMMANDS_TRACKING"]

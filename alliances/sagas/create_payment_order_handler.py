@@ -62,7 +62,7 @@ def publish_next_saga_command(session, saga_instance):
         interactions_data = saga_data.get("interactions_data", {})
         total_interactions = interactions_data.get("total_interactions", 0)
         
-        # Create cost calculation command
+        # Create cost calculation command - affiliates service will get brand_id and affiliate_id from post_id
         calculate_cost_command = {
             "saga_id": saga_instance.saga_id,
             "post_id": post_id,
@@ -122,6 +122,8 @@ def handle_cost_calculated_event(payload, props):
         
         # Extract cost data
         post_id = cost_data.get("post_id")
+        brand_id = cost_data.get("brand_id")
+        affiliate_id = cost_data.get("affiliate_id")
         total_cost = cost_data.get("total_cost", 0)
         base_cost = cost_data.get("base_cost", 0)
         engagement_multiplier = cost_data.get("engagement_multiplier", 1.0)
@@ -146,7 +148,9 @@ def handle_cost_calculated_event(payload, props):
                 "base_cost": base_cost,
                 "engagement_multiplier": engagement_multiplier,
                 "interactions_count": interactions_count,
-                "post_id": post_id
+                "post_id": post_id,
+                "brand_id": brand_id,
+                "affiliate_id": affiliate_id
             })
             
             saga_instance.data = saga_data
@@ -184,8 +188,8 @@ def persist_post_cost(session, saga_data, cost_data):
         # Extract required data
         post_id = cost_data.get("post_id")
         total_cost = cost_data.get("total_cost", 0)
-        brand_id = saga_data.get("brand_id")
-        affiliate_id = saga_data.get("affiliate_id")
+        brand_id = cost_data.get("brand_id")
+        affiliate_id = cost_data.get("affiliate_id")
         
         if not post_id:
             logging.error("Cannot persist post cost: post_id is missing")
