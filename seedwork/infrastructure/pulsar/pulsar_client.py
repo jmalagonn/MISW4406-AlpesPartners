@@ -27,6 +27,5 @@ def client() -> pulsar.Client:
         PULSAR_URL,
         operation_timeout_seconds=30,
         connection_timeout_ms=10000,
-        io_threads=1,
-        listener_threads=1
+        io_threads=1
     )
