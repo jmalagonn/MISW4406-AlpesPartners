@@ -169,6 +169,11 @@ services:
     environment:
       DATABASE_URL: postgresql+psycopg2://app:app@alliances_db:5432/app
       PULSAR_URL: pulsar://pulsar:6650
+      TOPIC_COMMANDS_TRACKING: commands.tracking
+      TOPIC_EVENTS_TRACKING: events.tracking
+      TOPIC_COMMANDS_AFFILIATES: commands.affiliates
+      TOPIC_EVENTS_AFFILIATES: events.affiliates
+      TOPIC_EVENTS_ALLIANCES: events.alliances
       DEBUG: "true"
     depends_on:
       alliances_db:
@@ -197,7 +202,10 @@ services:
       PULSAR_URL: pulsar://pulsar:6650
       TOPIC_COMMANDS_ALLIANCES: commands.alliances
       TOPIC_COMMANDS_AFFILIATES: commands.affiliates
+      TOPIC_COMMANDS_TRACKING: commands.tracking
       TOPIC_EVENTS_TRACKING: events.tracking
+      TOPIC_EVENTS_AFFILIATES: events.affiliates
+      TOPIC_EVENTS_ALLIANCES: events.alliances
       ALLIANCES_SERVICE_COMMANDS: alliances-svc-commands
       TRACKING_SERVICE_EVENTS: tracking-svc-events
     depends_on:

@@ -16,6 +16,7 @@ from alliances.application.queries.get_post_costs import (
 from alliances.application.dto.post_costs_dto import PostCostFiltersDTO
 from alliances.infrastructure.db.db import session_scope
 from alliances.infrastructure.db.db_models import SagaInstance
+from alliances.config import settings
 from seedwork.infrastructure.pulsar.publisher import publish
 from seedwork.infrastructure.pulsar.pulsar_client import new_envelope
 
@@ -50,7 +51,7 @@ def close_payout():
             }
         ))
         
-        topic = current_app.config["TOPIC_COMMANDS_TRACKING"]
+        topic = settings.TOPIC_COMMANDS_TRACKING
         env = new_envelope("command.BuildInteractionsInfo", saga_id, body)
         
         publish(
