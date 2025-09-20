@@ -3,6 +3,7 @@ from affiliates.application.commands.create_post import CreatePost, CreatePostHa
 from affiliates.infrastructure.db.db import session_scope
 from affiliates.application.commands.create_affiliate import CreateAffiliate, CreateAffiliateHandler
 from affiliates.application.commands.calculate_cost import CalculateCost, CalculateCostHandler
+from affiliates import create_app
 from seedwork.infrastructure.pulsar.consumer import start_consumer
 
 logging.basicConfig(
@@ -58,10 +59,12 @@ def handle_calculate_cost_command(payload, props):
         logging.info("Processing CalculateCost command with payload: %s", json.dumps(payload))
         
         # Extract command data from payload
-        post_id = payload.get("post_id")
-        saga_id = payload.get("saga_id")
-        interactions_count = payload.get("interactions_count", 0)
-        interactions_data = payload.get("interactions_data", {})
+        # The actual command data is nested inside the 'payload' field
+        command_payload = payload.get("payload", {})
+        post_id = command_payload.get("post_id")
+        saga_id = command_payload.get("saga_id")
+        interactions_count = command_payload.get("interactions_count", 0)
+        interactions_data = command_payload.get("interactions_data", {})
         
         # Validate required fields
         if not post_id:
@@ -97,7 +100,11 @@ def handle_calculate_cost_command(payload, props):
 
 
 def main():
-    start_consumer(TOPIC_COMMANDS_AFFILIATES, SUBSCRIPTION_NAME, handle)
+    # Create Flask app for application context
+    app = create_app()
+    
+    with app.app_context():
+        start_consumer(TOPIC_COMMANDS_AFFILIATES, SUBSCRIPTION_NAME, handle)
 
 
 if __name__ == "__main__":

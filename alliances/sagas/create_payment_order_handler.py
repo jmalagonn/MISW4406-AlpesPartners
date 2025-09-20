@@ -23,7 +23,7 @@ def handle_interactions_info_built_event(payload, props):
         logging.info("Found %d interactions for post_id: %s", total_interactions, post_id)
         
         # Update SAGA instance with commission data
-        with SessionLocal.begin() as session:
+        with SessionLocal() as session:
             saga_instance = session.get(SagaInstance, saga_id)
             if not saga_instance:
                 logging.error("SAGA instance not found: %s", saga_id)
@@ -71,18 +71,18 @@ def publish_next_saga_command(session, saga_instance):
         }
         
         envelope = new_envelope(
-            command_type="command.CalculateCost",
+            msg_type="command.CalculateCost",
             saga_id=str(saga_instance.saga_id),
             payload=calculate_cost_command,
-            properties={"name": "CalculateCost"}
+            headers={"name": "CalculateCost"}
         )
         
         # Publish to payment processing topic
         publish(
             topic=TOPIC_COMMANDS_AFFILIATES,
             key=str(saga_instance.saga_id),
-            payload=envelope.payload,
-            properties=envelope.properties
+            payload=envelope,
+            properties={"name": "CalculateCost"}
         )
         
         logging.info("Published ProcessPayment command for SAGA: %s", saga_instance.saga_id)
@@ -132,7 +132,7 @@ def handle_cost_calculated_event(payload, props):
         logging.info("Cost calculated for post_id %s: total_cost=%f", post_id, total_cost)
         
         # Update SAGA instance with cost data
-        with SessionLocal.begin() as session:
+        with SessionLocal() as session:
             from alliances.infrastructure.db.db_models import SagaStatus
             
             saga_instance = session.get(SagaInstance, saga_id)
@@ -248,10 +248,10 @@ def publish_saga_completion_event(saga_id, saga_data, cost_data):
         
         # Create event envelope
         envelope = new_envelope(
-            command_type="event.SagaCompleted",
+            msg_type="event.SagaCompleted",
             saga_id=str(saga_id),
             payload=completion_payload,
-            properties={"name": "SagaCompleted"}
+            headers={"name": "SagaCompleted"}
         )
         
         # Publish completion event

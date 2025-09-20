@@ -4,6 +4,7 @@ from infrastructure.db.projections import ensure_projection, increment_status
 from application.handlers.interaction_handler import InteractionHandler
 from application.commands.build_interactions_info import BuildInteractionsInfo, BuildInteractionsInfoHandler
 from infrastructure.db.db import session_scope
+from __init__ import create_app
 
 logging.basicConfig(
     level=os.getenv("LOG_LEVEL", "INFO"),
@@ -64,9 +65,10 @@ def handle_build_interactions_info_command(payload, props):
         logging.info("Processing BuildInteractionsInfo command with payload: %s", json.dumps(payload))
         
         # Extract command data from payload
-        start_date = payload.get("start_date")
-        end_date = payload.get("end_date") 
-        post_id = payload.get("post_id")
+        command_payload = payload.get("payload", {})
+        start_date = command_payload.get("start_date")
+        end_date = command_payload.get("end_date") 
+        post_id = command_payload.get("post_id")
         saga_id = payload.get("saga_id")
         
         # Validate required fields
@@ -101,8 +103,12 @@ def handle_build_interactions_info_command(payload, props):
         increment_status(status="error")
 
 def main():
-  ensure_projection()  # crea tabla de proyección si no existe
-  start_consumer(TOPIC_COMMANDS_TRACKING, SUBSCRIPTION_NAME, handle)
+  # Create Flask app for application context
+  app = create_app()
+  
+  with app.app_context():
+    ensure_projection()  # crea tabla de proyección si no existe
+    start_consumer(TOPIC_COMMANDS_TRACKING, SUBSCRIPTION_NAME, handle)
 
 
 if __name__ == "__main__":

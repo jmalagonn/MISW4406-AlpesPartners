@@ -257,3 +257,32 @@ def get_total_cost_by_post(post_id):
     except Exception as e:
         current_app.logger.error(f"Error getting total cost by post: {str(e)}")
         return jsonify({"error": "Internal server error"}), 500
+
+
+# SAGA Management Endpoints
+
+@bp.get("/sagas/<uuid:saga_id>")
+def get_saga_status(saga_id):
+    """Get the status of a SAGA instance"""
+    try:
+        with session_scope() as session:
+            saga_instance = session.get(SagaInstance, saga_id)
+            
+            if not saga_instance:
+                return jsonify({"error": "SAGA instance not found"}), 404
+            
+            # Convert SAGA instance to response format
+            saga_data = {
+                "saga_id": str(saga_instance.saga_id),
+                "saga_type": saga_instance.saga_type,
+                "status": saga_instance.status,
+                "step": saga_instance.step,
+                "data": saga_instance.data,
+                "updated_at": saga_instance.updated_at.isoformat() if saga_instance.updated_at else None
+            }
+            
+            return jsonify(saga_data), 200
+            
+    except Exception as e:
+        current_app.logger.error(f"Error getting SAGA status: {str(e)}")
+        return jsonify({"error": "Internal server error"}), 500

@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from flask import current_app, jsonify
 from infrastructure.repository import InteractionRepository
 from infrastructure.pulsar.publisher import publish
+from config import settings
 
 def _now_iso(): 
   return datetime.now(timezone.utc).isoformat()
@@ -50,7 +51,7 @@ class BuildInteractionsInfoHandler:
         logger.info(f"Found {len(interactions_by_post)} interactions for post_id: {command.post_id}")
         
         saga_id = self.env.get("saga_id")
-        topic = current_app.config["TOPIC_EVENTS_TRACKING"]
+        topic = settings.TOPIC_EVENTS_TRACKING
         
         # Convert interactions to serializable format
         interactions_data = []
