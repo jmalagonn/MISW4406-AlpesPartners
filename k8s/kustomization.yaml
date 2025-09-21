@@ -15,11 +15,11 @@ resources:
   - ingress.yaml
 
 images:
-  - name: gcr.io/desarrolloswcloud/bff
+  - name: gcr.io/alpes-experiment/bff
     newTag: latest
-  - name: gcr.io/desarrolloswcloud/tracking
+  - name: gcr.io/alpes-experiment/tracking
     newTag: latest
-  - name: gcr.io/desarrolloswcloud/affiliates
+  - name: gcr.io/alpes-experiment/affiliates
     newTag: latest
-  - name: gcr.io/desarrolloswcloud/alliances
+  - name: gcr.io/alpes-experiment/alliances
     newTag: latest
