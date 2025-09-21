@@ -1,8 +1,7 @@
 import logging
-from datetime import datetime
 from dataclasses import dataclass, asdict
 from typing import override
-from alliances.application.dto import BrandDTO
+from alliances.application.dto.dto import BrandDTO
 from alliances.application.mappers.brand_mapper import BrandMapper
 from alliances.domain.factories.brand_factory import BrandFactory
 from alliances.domain.repositories import BrandRepository

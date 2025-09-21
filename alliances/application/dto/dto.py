@@ -9,6 +9,6 @@ class BrandDTO(DTO):
 
 @dataclass(frozen=True)
 class CreatePaymentOrderDTO(DTO):
+    post_id: str
     start_date: str
     end_date: str
-    post_id: str

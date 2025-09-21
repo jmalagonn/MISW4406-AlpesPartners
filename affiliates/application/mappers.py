@@ -35,5 +35,19 @@ class PostMapper(Mapper):
         return Post(title=title, content=content, affiliate_id=affiliate_id, brand_id=brand_id)
 
     @override
-    def entity_to_dto(self, entity: Entity) -> any:
-        ...
+    def entity_to_dto(self, entity: Post) -> PostDTO:
+        id = entity.id
+        title = entity.title
+        content = entity.content
+        affiliate_id = entity.affiliate_id
+        brand_id = entity.brand_id
+        created_at = entity.created_at
+        
+        return PostDTO(
+            id=id,
+            title=title,
+            content=content,
+            affiliate_id=affiliate_id,
+            brand_id=brand_id,
+            created_at=created_at)
+        

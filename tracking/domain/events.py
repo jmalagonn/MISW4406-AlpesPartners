@@ -26,3 +26,4 @@ class InteractionTracked(Event):
         self.target_element_type = target_element_type
         self.campaign_id = campaign_id
         self.timestamp = timestamp
+    
