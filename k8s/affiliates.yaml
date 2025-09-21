@@ -40,7 +40,7 @@ spec:
             cpu: "100m"
       - name: affiliates-worker
         image: gcr.io/alpes-experiment/affiliates:latest
-        command: ["python", "-m", "presentation.worker"]
+        command: ["python", "-m", "affiliates.presentation.worker"]
         env:
         - name: DATABASE_URL
           value: "postgresql+psycopg2://app:app@postgres:5432/app"
