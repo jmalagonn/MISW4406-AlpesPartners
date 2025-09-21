@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: affiliates-api
-        image: gcr.io/desarrolloswcloud/affiliates:latest
+        image: gcr.io/alpes-experiment/affiliates:latest
         ports:
         - containerPort: 8000
         env:
@@ -39,7 +39,7 @@ spec:
             memory: "128Mi"
             cpu: "100m"
       - name: affiliates-worker
-        image: gcr.io/desarrolloswcloud/affiliates:latest
+        image: gcr.io/alpes-experiment/affiliates:latest
         command: ["python", "-m", "presentation.worker"]
         env:
         - name: DATABASE_URL

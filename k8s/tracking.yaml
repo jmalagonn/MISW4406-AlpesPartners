@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: tracking-api
-        image: gcr.io/desarrolloswcloud/tracking:latest
+        image: gcr.io/alpes-experiment/tracking:latest
         ports:
         - containerPort: 8010
         env:
@@ -39,7 +39,7 @@ spec:
             memory: "128Mi"
             cpu: "100m"
       - name: tracking-worker
-        image: gcr.io/desarrolloswcloud/tracking:latest
+        image: gcr.io/alpes-experiment/tracking:latest
         command: ["python", "-m", "presentation.worker"]
         env:
         - name: DATABASE_URL

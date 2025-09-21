@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: alliances-api
-        image: gcr.io/desarrolloswcloud/alliances:latest
+        image: gcr.io/alpes-experiment/alliances:latest
         ports:
         - containerPort: 8020
         env:
@@ -39,7 +39,7 @@ spec:
             memory: "128Mi"
             cpu: "100m"
       - name: alliances-worker
-        image: gcr.io/desarrolloswcloud/alliances:latest
+        image: gcr.io/alpes-experiment/alliances:latest
         command: ["python", "-m", "presentation.worker"]
         env:
         - name: DATABASE_URL

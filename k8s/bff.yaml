@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: bff
-        image: gcr.io/desarrolloswcloud/bff:latest
+        image: gcr.io/alpes-experiment/bff:latest
         ports:
         - containerPort: 8080
         env:
