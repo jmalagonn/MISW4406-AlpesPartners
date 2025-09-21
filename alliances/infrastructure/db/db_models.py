@@ -2,9 +2,10 @@ import uuid
 from enum import Enum
 from typing import Any, Optional
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-from sqlalchemy import String, DateTime, func, Float
+from sqlalchemy import String, DateTime, Float, func
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from datetime import datetime
+
 
 class Base(DeclarativeBase):
     pass
@@ -14,12 +15,14 @@ class BrandDBModel(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name: Mapped[str] = mapped_column(String, nullable=False)
+    category: Mapped[str] = mapped_column(String, nullable=False, default="general")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
-    
+    updated_on: Mapped[datetime] = mapped_column(DateTime(timezone=True), onupdate=func.now(), server_default=func.now(), nullable=False)
+
 
 class PostCostsDBModel(Base):
     __tablename__ = "post_costs"
-    
+
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     post_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
     affiliate_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
@@ -38,8 +41,8 @@ class SagaStatus(str, Enum):
     COMPENSATED = "COMPENSATED"
     TIMED_OUT = "TIMED_OUT"
     CANCELLED = "CANCELLED"
-    
-    
+
+
 class SagaInstance(Base):
     __tablename__ = "saga_instances"
 
@@ -49,7 +52,7 @@ class SagaInstance(Base):
     step: Mapped[int] = mapped_column(nullable=False, default=0)
     data: Mapped[JSONB] = mapped_column(JSONB, nullable=True)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), onupdate=func.now(), server_default=func.now())
-    
+
 
 class InboxProcessedDBModel(Base):
     __tablename__ = "inbox_processed"

@@ -12,10 +12,12 @@ def handle_list_brands(session):
     rows = repo.get_all()
     
     return [
-      {
-        "id": c.id, 
-        "name": c.name,
-        "created_at": c.created_at.isoformat() if c.created_at else None
-      } for c in rows
+        {
+            "id": str(c.id),
+            "name": c.name,
+            "category": c.category,
+            "created_at": c.created_at.isoformat() if c.created_at else None,
+            "updated_on": c.updated_on.isoformat() if c.updated_on else None
+        }
+        for c in rows
     ]
-    

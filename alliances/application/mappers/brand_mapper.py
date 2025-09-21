@@ -13,11 +13,18 @@ class BrandMapper(Mapper):
         
     @override
     def dto_to_entity(self, dto: BrandDTO) -> Brand:
-        name = dto.name                
-        brand = Brand(name=name)
-        
-        return brand      
+        brand = Brand(
+            name=dto.name,
+            category=getattr(dto, "category", "general")
+        )
+        return brand
 
     @override
-    def entity_to_dto(self, entity: Entity) -> any:
-        ...
+    def entity_to_dto(self, entity: Brand) -> BrandDTO:
+        return BrandDTO(
+            id=entity.id,
+            name=entity.name,
+            category=getattr(entity, "category", "general"),
+            created_at=entity.created_at,
+            updated_on=entity.updated_on
+        )
