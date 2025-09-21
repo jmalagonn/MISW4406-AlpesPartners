@@ -28,6 +28,37 @@ class DomainEvent():
 
 @dataclass
 class AffiliateCreatedEvent(DomainEvent):
+    affiliate_id: uuid.UUID
     name: str
-    created_at: datetime = field(default=datetime.now())
-  
+    email: str
+    program_id: uuid.UUID
+    created_at: datetime = field(default_factory=lambda: datetime.now())
+
+
+@dataclass
+class AffiliateActivatedEvent(DomainEvent):
+    affiliate_id: uuid.UUID
+    activated_at: datetime = field(default_factory=lambda: datetime.now())
+
+
+@dataclass
+class AffiliateSuspendedEvent(DomainEvent):
+    affiliate_id: uuid.UUID
+    reason: str = "No reason provided"
+    suspended_at: datetime = field(default_factory=lambda: datetime.now())
+
+@dataclass
+class PostCreatedEvent(DomainEvent):
+    post_id: uuid.UUID
+    title: str
+    content: str
+    affiliate_id: uuid.UUID
+    brand_id: uuid.UUID
+    created_at: datetime = field(default_factory=lambda: datetime.now())
+
+
+@dataclass
+class PostUpdatedEvent(DomainEvent):
+    post_id: uuid.UUID
+    content: str
+    updated_at: datetime = field(default_factory=lambda: datetime.now())
