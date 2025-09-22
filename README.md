@@ -133,34 +133,54 @@ El servicio de tracking utiliza **eventos de carga de estado** (`InteractionTrac
 5. **Flexibilidad**: Fácil evolución del esquema
 
 
-## Escenario de Disponibilidad — Tracking (Mariana)
+## Escenario de Disponibilidad (Mariana Díaz)
 
-Para este escenario buscabamos asegurar disponibilidad del servicio de Tracking al tener una situación de alto tráfico por parte de los usuarios (más de 10,000 interacciones) donde el servicio pudiese manejarlo correctamente y procesarlo acorde a ello.
+<img width="1382" height="825" alt="image" src="https://github.com/user-attachments/assets/1dacd120-f6ca-48bd-824a-b48a6c222bd8" />
 
-Para ello, se implementó un nginx que nos permitiera balancear las peticiones HTTP entre tres diferentes instancias del servicio de tracking para manejar la carga apropiadamente. Para hacer una simulación de la carga se puede levantar el proyecto como se menciona al inicio de este README y posteriormente hacer una prueba de 10,000 peticiones con el siguiente comando de manera local.
+### Ejecución de una interacción para probar la HA
 
-```bash
-# Peticiones al servicio de tracking
-for i in {1..10000}; do
-  RESPONSE=$(curl -s -X POST http://localhost:8040/tracking/interactions \
-    -H "Content-Type: application/json" \
-    -d '{"interaction_type":"click","target_element_id":"123","target_element_type":"button","campaign_id":"123"}')
-  echo "Request $i: $RESPONSE"
-done
-```
-Para verificar que se ha recibido correctamente las 10000 peticiones en el nginx se puede verificar la cantidad de peticiones que se reciben al ejecutar este comando
+Revisar la siguiente sección donde se referencia detalladamente como realizar una interacción al servicio 
 
-```bash
-docker logs misw4406-alpespartners-tracking_nginx-1 2>&1 | grep '/tracking/interactions' | wc -l
-```
+[Paso a Paso Ejecución](https://github.com/jmalagonn/MISW4406-AlpesPartners/wiki/Escenario-Escalabilidad#paso-a-paso-para-ejecutar-el-escenario-de-cqrs-en-tracking-creaci%C3%B3n-de-interacci%C3%B3n)
 
-Así mismo, los workers se configuraron para ser resilientes en caso de fallo con la siguiente configuración
+### Decisiones Arquitecturales
 
-```bash
-consumer_type=pulsar.ConsumerType.KeyShared
-```
+#### Kubernetes con Autoescalado Horizontal (HPA)
 
-Y tambien se implementó graceful shutdown, donde si un contenedor necesita reiniciarse o escalarse, recibe la señal SIGTERM o SIGINT, deja de recibir nuevos mensajes, procesa los mensajes actuales, cierra la conexión con Pulsar y termina de forma segura. Esto evita la pérdida de eventos y permite reinicios seguros sin interrumpir el flujo de trabajo.
+* Configurado con minReplicas: 2, maxReplicas: 10.
+* Escalado basado en CPU > 70% y Memoria > 70%.
+* Permite escalado automático y auto-healing, aunque introduce overhead de orquestación y se debe considerar el tiempo de warm-up de los pods.
+* Riesgo: una configuración inadecuada puede causar escalado excesivo y desperdicio de recursos.
+
+
+#### Health Checks y Graceful Shutdown
+* Configurados con un periodo de gracia de 30 segundos.
+* Ante SIGTERM o SIGINT, los contenedores:
+     1. Dejan de recibir nuevos mensajes.
+     2. Procesan los mensajes actuales.
+     3. Cierran la conexión con Pulsar.
+     4. Terminan de forma segura, evitando pérdida de eventos.
+     5. Garantizan resiliencia y reinicios seguros, aunque un mal ajuste podría generar overhead o falsos positivos en la detección de fallos.
+
+
+#### Workers resilientes con Pulsar KeyShared
+* Configuración: consumer_type=pulsar.ConsumerType.KeyShared.
+* Permite que múltiples workers procesen eventos en paralelo de forma balanceada, manteniendo entrega ordenada por clave.
+* Asegura que no haya duplicación de eventos y que se mantenga continuidad durante fallos o escalados.
+* Riesgo: una mala configuración puede derivar en pérdida o duplicación de mensajes.
+
+
+### Justificación
+
+Estas decisiones garantizan que el servicio de tracking pueda mantener una disponibilidad mayor a 99.99% en escenarios de alta demanda.
+
+* El HPA permite absorber picos de tráfico con escalado automático.
+* Los health checks y graceful shutdown aseguran resiliencia y reinicios sin interrupciones.
+* La configuración de los workers con KeyShared mantiene continuidad en el consumo de eventos sin pérdidas durante fallos o escalados.
+
+### Experimentación del Escenario
+
+[Resultados de Prueba](https://github.com/jmalagonn/MISW4406-AlpesPartners/wiki/Experimento-Disponibilidad)
 
 
  ## Descripción de actividades realizada por cada miembro
