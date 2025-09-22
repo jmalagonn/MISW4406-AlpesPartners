@@ -33,11 +33,11 @@ spec:
               key: DEBUG
         resources:
           requests:
-            memory: "128Mi"
-            cpu: "20m"
+            memory: "512Mi"
+            cpu: "500m"
           limits:
-            memory: "256Mi"
-            cpu: "200m"
+            memory: "1Gi"
+            cpu: "1000m"
       - name: tracking-worker
         image: gcr.io/alpes-experiment/tracking:latest
         command: ["python", "-m", "presentation.worker"]
@@ -71,11 +71,11 @@ spec:
               key: LOG_LEVEL
         resources:
           requests:
-            memory: "128Mi"
-            cpu: "20m"
+            memory: "512Mi"
+            cpu: "500m"
           limits:
-            memory: "256Mi"
-            cpu: "200m"
+            memory: "1Gi"
+            cpu: "1000m"
 ---
 apiVersion: v1
 kind: Service
