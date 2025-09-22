@@ -27,7 +27,20 @@ def affiliates_health_check():
     with make_client(timeout) as client:
         response = client.get(f"{affiliates_url}/affiliates/health", headers=headers) 
 
-    return _proxy_response(response)
+    return proxy_response(response)
+
+
+@bp.get("/alliances/health")
+def alliances_health_check():
+    timeout = current_app.config["DEFAULT_TIMEOUT"]
+    alliances_url = current_app.config["ALLIANCES_API_URL"]
+
+    headers, req_id = forward_headers(request.headers)
+
+    with make_client(timeout) as client:
+        response = client.get(f"{alliances_url}/alliances/health", headers=headers) 
+
+    return proxy_response(response)
 
 
 @bp.get("/loyalty/health")
@@ -40,7 +53,7 @@ def loyalty_health_check():
     with make_client(timeout) as client:
         response = client.get(f"{loyalty_url}/loyalty/health", headers=headers) 
 
-    return _proxy_response(response)
+    return proxy_response(response)
 
 
 @bp.get("/tracking/health")
