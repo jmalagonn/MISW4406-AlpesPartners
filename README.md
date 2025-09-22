@@ -16,7 +16,7 @@ docker-compose up --build
 
 ## Escenario de Rendimiento — Tracking (Manuel Sánchez)
 
-<img width="1737" height="1058" alt="image" src="https://github.com/user-attachments/assets/3239ae13-09c6-4811-8f57-45c6657cf1f6" />
+<img alt="image" src="https://github.com/user-attachments/assets/566a9902-d2b2-43cb-be80-7c00e846cde4" />
 
 ### Ejecución de una interacción para probar el rendimiento
 
