@@ -5,7 +5,6 @@ metadata:
   namespace: alpes-experiment
   annotations:
     kubernetes.io/ingress.class: "gce"
-    networking.gke.io/managed-certificates: "bff-ssl-cert"
     cloud.google.com/backend-config: '{"default": "bff-backend-config"}'
 spec:
   rules:

@@ -40,7 +40,7 @@ spec:
             cpu: "100m"
       - name: alliances-worker
         image: gcr.io/desarrolloswcloud/alliances:latest
-        command: ["python", "-m", "presentation.worker"]
+        command: ["python", "-m", "alliances.presentation.worker"]
         env:
         - name: DATABASE_URL
           value: "postgresql+psycopg2://app:app@postgres:5432/app"
