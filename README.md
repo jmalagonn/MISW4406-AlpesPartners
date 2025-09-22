@@ -14,58 +14,45 @@ En una terminal situada en la raíz del proyecto, ejecuta el siguiente comando:
 docker-compose up --build
 ```
 
-## Escenario de rendimiento — Tracking (Manuel Sánchez)
+## Escenario de Rendimiento — Tracking (Manuel Sánchez)
+
 <img width="1737" height="1058" alt="image" src="https://github.com/user-attachments/assets/3239ae13-09c6-4811-8f57-45c6657cf1f6" />
 
-**Flujo:** Pulsar (comandos) - Worker de tracking - DB propia - API `/tracking/stats/daily`.
+### Ejecución de una interacción para probar el rendimiento
 
-### Paso a paso para ejecutar el escenario de rendimiento en Tracking
+Revisar la siguiente sección donde se referencia detalladamente cómo ejecutar el escenario de rendimiento en Tracking:
 
-1. **Levantar los servicios necesarios**  
-   Asegúrate de tener Pulsar, la base de datos, el servicio de tracking y el worker de tracking corriendo:  
-   ```bash
-   docker compose up -d tracking_db pulsar tracking tracking_worker```
+[Paso a Paso Ejecución](https://github.com/jmalagonn/MISW4406-AlpesPartners/wiki/Escenario-Rendimiento#paso-a-paso-para-ejecutar-el-escenario-de-rendimiento-en-tracking)
 
-2. **Verificar la salud del servicio de tracking**
-   Comprueba que el servicio responde correctamente:
-     ```bash
-     curl -s http://34.8.61.71/api/v1/tracking/health```
+### Decisiones Arquitecturales
 
-3. **Smoke test (opcional en local)**
-Publica un par de mensajes de prueba y valida que la proyección se actualiza:
+#### Kubernetes con Autoescalado Horizontal (HPA)
+* Configurado con minReplicas: 2, maxReplicas: 10.  
+* Escalado basado en CPU > 70% y Memoria > 70%.  
+* Políticas configuradas: escalado agresivo (200% cada 15s) y reducción moderada (50% cada 30s).  
+* Riesgo: la latencia en la reacción del escalado puede generar pérdida temporal de capacidad.
 
-```bash
-# publicar 2 mensajes de prueba
-docker compose exec pulsar bin/pulsar-client produce -m '{"demo":true}' -n 2 -k test commands.tracking
+#### Recursos por Pod
+* Requests: CPU 250m, Memoria 256Mi.  
+* Limits: CPU 500m, Memoria 512Mi.  
+* Garantizan un mínimo de rendimiento por instancia, pero también limitan la capacidad máxima antes de escalar.
 
-# vista materializada (esperado: incremento de count en el día actual)
-curl -s http://34.8.61.71/api/v1/tracking/stats/daily
-```
+#### Workers resilientes con Pulsar KeyShared
+* Configuración: consumer_type=pulsar.ConsumerType.KeyShared.  
+* Permite que múltiples workers procesen eventos en paralelo balanceando carga por clave.  
+* Asegura orden en el consumo de mensajes y evita duplicados, aunque requiere un ajuste cuidadoso de particiones y concurrencia.
 
-3. **Prueba de capacidad (≥80k/min)**
-Configura paralelismo y ejecuta carga sostenida:
-```bash
-# (una sola vez) retención infinita
-docker compose exec pulsar bin/pulsar-admin namespaces set-retention public/default --size -1 --time -1
+### Justificación
 
-# crear tópico particionado (si ya existe, ignorar)
-docker compose exec pulsar bin/pulsar-admin topics create-partitioned-topic commands.tracking --partitions 8 || true
+Estas decisiones buscan garantizar que el servicio de tracking pueda procesar entre **400 y 800 transacciones por minuto**, manteniendo resiliencia ante picos de carga.
 
-# escalar consumidores en paralelo
-docker compose up -d --scale tracking_worker=6
+* El HPA permite absorber picos de tráfico con escalado automático.  
+* La asignación de recursos asegura un balance entre costo y rendimiento por pod.  
+* La configuración de Pulsar distribuye la carga de forma equitativa, evitando pérdida de mensajes bajo alta demanda.  
 
-# enviar 90k mensajes/min (~1500 msg/s por 60s)
-docker compose exec pulsar bin/pulsar-perf produce \
-  -r 1500 -time 60 \
-  persistent://public/default/commands.tracking
-```
+### Experimentación del Escenario
 
-4. **Validación final**
-Consulta la proyección para confirmar que el contador refleja la carga procesada:
-```bash
-curl -s http://34.8.61.71/api/v1/tracking/stats/daily
-```
-
+[Resultados de Prueba](https://github.com/jmalagonn/MISW4406-AlpesPartners/wiki/Experimento-Rendimiento)
 
 ## Escenario de Escalabilidad - Tracking (Sergio Perez)
 <img  alt="image" src="https://github.com/user-attachments/assets/2459862c-2474-404a-9471-089c4471dfe1" />
